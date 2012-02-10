@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/home/zhoumo/workspace/CompSci108_Tivoo/lib/rendersnake-1.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/zhoumo/workspace/CompSci108_Tivoo/lib/commons-lang3-3.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/zhoumo/workspace/CompSci108_Tivoo/resources/docs-commons-apache/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/joda-time-2.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/zhoumo/workspace/CompSci108_Tivoo/resources/docs-joda/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/zhoumo/workspace/CompSci108_Tivoo/resources/docs-dom4j/apidocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
