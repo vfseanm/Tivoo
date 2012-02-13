@@ -1,16 +1,20 @@
-import model.ProtoModel;
+import java.awt.Dimension;
+
+import controller.TivooController;
+import model.TivooModel;
 
 public class Main {
-	
+
     public static void main(String[] args) {
-	ProtoModel p = new ProtoModel();
+	TivooModel model = new TivooModel();
 	String input = "dukecal.xml", outputsummary = "output/testhtml.html", 
 		outputdetails = "output/details/";
 	try {
-	    p.initialize(input, outputsummary, outputdetails);	
+	    model.initialize(input, outputsummary, outputdetails);	
 	} catch (Exception e) {
 	    System.out.println(e);
 	}
+	
     }
 
 }

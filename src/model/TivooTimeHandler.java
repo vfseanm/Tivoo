@@ -1,6 +1,7 @@
 package model;
 
 import org.joda.time.*;
+import org.joda.time.format.DateTimeFormatter;
 
 public class TivooTimeHandler {
 
@@ -14,9 +15,8 @@ public class TivooTimeHandler {
 		date, hour, minute, DateTimeZone.UTC);
     }
     
-    public static String createLocalTime(DateTime dt) {
-	DateTime transformed = dt.toDateTime(DateTimeZone.getDefault());
-	return transformed.toString("MM/dd/yyyy HH:mm");
+    public static DateTime createLocalTime(DateTime dt) {
+	return dt.toDateTime(DateTimeZone.getDefault());
     }
     
 }
