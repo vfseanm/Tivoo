@@ -21,7 +21,7 @@ public class VerticalTableWriter implements ITivooWriter {
 	FileWriter summarywriter = new FileWriter(outputsummary);
 	Collections.sort(eventlist, TivooEvent.EventDateComparator);
 	HtmlCanvas summary = new HtmlCanvas(summarywriter);
-	HashSet<DateTime> writtenstartdate = new HashSet<DateTime>();
+	HashSet<Integer> writtenstartdate = new HashSet<Integer>();
 	summary
 	.html()
 	  .head()	
@@ -35,15 +35,15 @@ public class VerticalTableWriter implements ITivooWriter {
 		String detailURL = outputdetails + eventlist.indexOf(e) + ".html";
 		DateTime localstart = TivooTimeHandler.createLocalTime(e.getStart());
 		DateTime localend = TivooTimeHandler.createLocalTime(e.getEnd());
-		if (!writtenstartdate.contains(localstart)) {
+		if (!writtenstartdate.contains(localstart.getDayOfYear())) {
 		    summary.tr().write("\n");
 		    summary.th(colspan("2").align("left").class_("day")).write(localstart.toString("EEE, MMM dd"))._th()._tr();
-		    writtenstartdate.add(localstart);
+		    writtenstartdate.add(localstart.getDayOfYear());
 		}
 		summary.tr().write("\n")
 		.th(class_("time")).write(localstart.toString("HH:mm") + "-" + localend.toString("HH:mm"))
 		._th().write("\n")
-		.td().a(href("details/" + eventlist.indexOf(e) + ".html")).write(e.getTitle())._a()
+		.td().a(href(outputdetails.split("/")[1]+ "/" + eventlist.indexOf(e) + ".html")).write(e.getTitle())._a()
 		._td().write("\n")
 		._tr().write("\n");
 		writeDetail(detailURL, outputsummary, e);

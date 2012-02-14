@@ -13,6 +13,8 @@ public class TivooReader {
     private static Map<String, ITivooParser> parsermap = new HashMap<String, ITivooParser>();
     static {
 	parsermap.put("events", new DukeCalParser());
+	parsermap.put("feed", new GoogleCalParser());
+
     }
     
     public static List<TivooEvent> read(String input) throws DocumentException {

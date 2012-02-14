@@ -12,7 +12,7 @@ public class Main {
 	try {
 	    model.initialize(input, outputsummary, outputdetails);	
 	} catch (Exception e) {
-	    System.out.println(e);
+	    e.printStackTrace();
 	}
 	
     }

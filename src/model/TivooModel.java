@@ -20,11 +20,11 @@ public class TivooModel {
 	eventlist = TivooReader.read(input);
 	//write(eventlist, outputsummary, outputdetails);
 	TivooController tc = new TivooController();
-	DateTime startdate = TivooTimeHandler.createTimeUTC("20110701T0000");
+	DateTime startdate = TivooTimeHandler.createTimeUTC("20110301T0000");
 	DateTime enddate = startdate.plusDays(180);
-	List<TivooEvent> filtered = tc.doFilterByTime(eventlist, startdate, enddate);
-	List<TivooEvent> filteredagain = tc.doFilterByKeyword(filtered, "Duke");
-	tc.doWriteVerticalTable(filteredagain, outputsummary, outputdetails, 
+	//List<TivooEvent> filtered = tc.doFilterByTime(eventlist, startdate, enddate);
+	//List<TivooEvent> filteredagain = tc.doFilterByKeyword(filtered, "Duke");
+	tc.doWriteVerticalTable(eventlist, outputsummary, outputdetails, 
 		startdate, enddate);
 
     }
