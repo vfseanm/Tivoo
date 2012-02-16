@@ -2,7 +2,6 @@ package filters;
 
 import java.util.*;
 import model.*;
-import org.dom4j.*;
 import org.joda.time.*;
 
 public class Filter {

@@ -1,18 +1,10 @@
 package controller;
-import java.io.File; 
-
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
-
-import model.TivooEvent;
-import model.TivooException;
-import model.TivooTimeHandler;
-
-import org.joda.time.DateTime;
-
-import writers.VerticalTableWriter;
-
-import filters.Filter;
+import org.joda.time.*;
+import model.*;
+import writers.*;
+import filters.*;
 
 public class TivooController {
 
@@ -28,7 +20,7 @@ public class TivooController {
     public void doWriteVerticalTable(List<TivooEvent> eventlist, String outputsummary, 
 	    String outputdetails, DateTime startdate, DateTime enddate) {
 	try {
-	    new VerticalTableWriter().write(eventlist, outputsummary, outputdetails, startdate, enddate);
+	    new VerticalTableWriter().write(eventlist, outputsummary, outputdetails);
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}

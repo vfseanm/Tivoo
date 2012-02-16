@@ -1,12 +1,9 @@
 package model;
-import java.io.File;
+import java.io.*;
 import java.util.*;
-
 import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-
+import org.dom4j.io.*;
 import parsers.*;
-
 
 public class TivooReader {
 
@@ -14,7 +11,6 @@ public class TivooReader {
     static {
 	parsermap.put("events", new DukeCalParser());
 	parsermap.put("feed", new GoogleCalParser());
-
     }
     
     public static List<TivooEvent> read(String input) throws DocumentException {

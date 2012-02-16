@@ -1,17 +1,10 @@
 package parsers;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.dom4j.Document;
-import org.dom4j.Node;
-import org.joda.time.DateTime;
-
+import java.util.*;
+import org.dom4j.*;
+import org.joda.time.*;
 import model.*;
 
 public class DukeCalParser implements ITivooParser {
-    
-    public DukeCalParser() {}
     
     public List<TivooEvent> convertToList(Document doc) {
 	@SuppressWarnings("unchecked")

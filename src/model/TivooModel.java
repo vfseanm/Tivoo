@@ -1,16 +1,7 @@
 package model;
-import java.io.*;
 import java.util.*;
 import org.joda.time.*;
-import org.rendersnake.*;
-import static org.rendersnake.HtmlAttributesFactory.*;
-import org.dom4j.*;
-import org.dom4j.io.*;
-
-import controller.TivooController;
-
-import writers.*;	
-import filters.Filter;
+import controller.*;
 
 public class TivooModel {
 

@@ -1,23 +1,10 @@
 package parsers;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
 import org.dom4j.*;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
-import org.joda.time.Months;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
-import org.joda.time.format.DateTimeParser;
-
-import model.ITivooParser;
-import model.TivooEvent;
-import model.TivooException;
-import model.TivooTimeHandler;
+import org.joda.time.*;
+import org.joda.time.format.*;
+import model.*;
 
 public class GoogleCalParser implements ITivooParser {
 
@@ -35,8 +22,9 @@ public class GoogleCalParser implements ITivooParser {
 	    if (timestring.startsWith("Recurring")) continue;
 	    ArrayList<DateTime> startend = parseOneTimeEvent(timestring, timezone);
 	    if (startend == null) continue;
-	    eventlist.add(new TivooEvent(titlefield.getStringValue(), 
-		    startend.get(0), startend.get(1), descriptionfield.getStringValue()));
+	    eventlist.add(new TivooEvent(TivooUtils.sanitizeString(titlefield.getStringValue()), 
+		    startend.get(0), startend.get(1), 
+		    TivooUtils.sanitizeString(descriptionfield.getStringValue())));
 	}
 	return eventlist;
     }
@@ -56,8 +44,8 @@ public class GoogleCalParser implements ITivooParser {
 	int _date = Integer.parseInt(date);
 	int _year = Integer.parseInt(year);
 	DateTimeParser[] parsers = { 
-	        DateTimeFormat.forPattern( "HH:mmaa" ).getParser(),
-	        DateTimeFormat.forPattern( "HHaa" ).getParser() };
+	        DateTimeFormat.forPattern( "hh:mmaa" ).getParser(),
+	        DateTimeFormat.forPattern( "hhaa" ).getParser() };
 	DateTimeFormatter hourformat = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
 	int _starthour = hourformat.parseDateTime(starttime).getHourOfDay();
 	int _startminute = hourformat.parseDateTime(starttime).getMinuteOfHour();

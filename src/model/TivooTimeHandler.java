@@ -4,7 +4,7 @@ import org.joda.time.*;
 import org.joda.time.format.DateTimeFormatter;
 
 public class TivooTimeHandler {
-
+    
     public static DateTime createTimeUTC(String UTCrepresentation) {
 	int year = Integer.parseInt(UTCrepresentation.substring(0, 4));
 	int month = Integer.parseInt(UTCrepresentation.substring(4, 6));
@@ -13,7 +13,7 @@ public class TivooTimeHandler {
 	int minute = Integer.parseInt(UTCrepresentation.substring(11, 13));
 	return new DateTime(year, month, 
 		date, hour, minute, DateTimeZone.UTC);
-    }
+    }    
     
     public static DateTime createLocalTime(DateTime dt) {
 	return dt.toDateTime(DateTimeZone.getDefault());

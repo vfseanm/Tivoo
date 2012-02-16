@@ -1,14 +1,11 @@
 package model;
 
 import java.io.*;
-import java.util.List;
-
-import org.joda.time.DateTime;
+import java.util.*;
 
 public interface ITivooWriter {
 
-    public void write(List<TivooEvent> eventlist, 
-	    String outputsummary, String outputdetails, DateTime startdate, DateTime enddate)
+    public void write(List<TivooEvent> eventlist, String outputsummary, String outputdetails)
     throws IOException;
     
 }
