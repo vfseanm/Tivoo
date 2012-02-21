@@ -5,8 +5,10 @@ import org.joda.time.*;
 public class TivooEvent {
 
     public enum event_type {
-	DUKE_EVENT,GOOGLE_EVENT, TV_EVENT;
+	DUKE_EVENT, GOOGLE_EVENT, TV_EVENT;
     }
+    
+    private HashSet<String> myAttributes;
     
     private String myTitle;
     private DateTime myStart;
@@ -14,10 +16,17 @@ public class TivooEvent {
     private String myDescription;
     
     public TivooEvent(String title, DateTime starttime, DateTime endtime, String description) {
+	myAttributes = new HashSet<String>();
 	myTitle = title;
 	myStart = starttime;
 	myEnd = endtime;
 	myDescription = description;
+	myAttributes.add(myTitle.toLowerCase());
+	myAttributes.add(myDescription.toLowerCase());
+    }
+    
+    public Set<String> getAttributes() {
+	return Collections.unmodifiableSet(myAttributes);
     }
     
     public String getTitle() {
@@ -44,6 +53,18 @@ public class TivooEvent {
 	return getInterval().overlaps(other.getInterval());
 	/*return ((other.getStart().compareTo(getEnd()) < 0 && getEnd().compareTo(other.getEnd()) <= 0) ||
 		(getStart().compareTo(other.getEnd()) < 0 && other.getEnd().compareTo(getEnd()) <= 0));*/
+    }
+    
+    public boolean hasKeyWord(String keyword) {
+	String lower = keyword.toLowerCase();
+	for (String s: getAttributes())
+	    if (s.contains(lower)) return true;
+	return false;
+    }
+    
+    public boolean isLongEvent() {
+	if (Hours.hoursBetween(getStart(), getEnd()).getHours() > 24) return true;
+	return false;
     }
     
     public boolean equals(Object o) {

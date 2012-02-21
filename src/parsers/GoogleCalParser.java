@@ -1,12 +1,11 @@
 package parsers;
-
 import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
 import model.*;
 
-public class GoogleCalParser implements ITivooParser {
+public class GoogleCalParser extends TivooParser {
 
     public List<TivooEvent> convertToList(Document doc) {
 	@SuppressWarnings("unchecked")
@@ -22,9 +21,9 @@ public class GoogleCalParser implements ITivooParser {
 	    if (timestring.startsWith("Recurring")) continue;
 	    ArrayList<DateTime> startend = parseOneTimeEvent(timestring, timezone);
 	    if (startend == null) continue;
-	    eventlist.add(new TivooEvent(TivooUtils.sanitizeString(titlefield.getStringValue()), 
+	    eventlist.add(new TivooEvent(sanitizeString(titlefield.getStringValue()), 
 		    startend.get(0), startend.get(1), 
-		    TivooUtils.sanitizeString(descriptionfield.getStringValue())));
+		    sanitizeString(descriptionfield.getStringValue())));
 	}
 	return eventlist;
     }

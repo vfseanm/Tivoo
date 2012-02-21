@@ -8,8 +8,8 @@ package model;
 public class TivooException extends RuntimeException {
  
     public static enum Type {
-	BAD_FORMAT
-    };
+	BAD_FORMAT, BAD_DATA;
+    }
 
     private Type myType;
 
