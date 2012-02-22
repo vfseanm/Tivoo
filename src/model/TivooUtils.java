@@ -11,7 +11,7 @@ public class TivooUtils {
 	    } 
 	    else if(file.isDirectory()){ 
 		File files[] = file.listFiles(); 
-		for (int i=0;i<files.length;i++)
+		for (int i = 0; i < files.length; i++)
 		    deleteFile(files[i].getPath()); 
 	    } 
 	    file.delete(); 
@@ -25,7 +25,7 @@ public class TivooUtils {
 	if (file.exists()) { 
 	    if(file.isDirectory()){ 
 		File files[] = file.listFiles(); 
-		for (int i=0;i<files.length;i++)
+		for (int i = 0; i < files.length; i++)
 		    deleteFile(files[i].getPath()); 
 	    }
        	} else{ 

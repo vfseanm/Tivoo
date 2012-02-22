@@ -1,5 +1,6 @@
 package writers;
 import static org.rendersnake.HtmlAttributesFactory.*;
+
 import java.io.IOException;
 import model.TivooEvent;
 import org.rendersnake.HtmlCanvas;
@@ -9,6 +10,14 @@ public abstract class TivooWriter {
 
     public abstract void write(List<TivooEvent> eventlist, String outputsummary, String outputdetails)
 	    throws IOException;
+    
+    protected void doWriteDetailPage(TivooEvent e, String outputsummary)
+	    throws IOException {
+	List<TivooEvent> oneevent = new ArrayList<TivooEvent>();
+	oneevent.add(e);
+	new DetailPageWriter().write(oneevent, outputsummary, 
+		buildDetailURL(e));
+    }
     
     protected void writeHeadWithCSS(HtmlCanvas target, String stylefile) throws IOException {
 	target.head()
@@ -28,7 +37,17 @@ public abstract class TivooWriter {
     
     protected void writeTableCell(HtmlCanvas target, String content, String cssclass) 
 	    throws IOException {
-	target.td(class_("cssclass")).write(content)._td();
+	target.td(class_(cssclass)).write(content)._td();
+    }
+    
+    protected void writeTableCell(HtmlCanvas target, String content, String cssclass, String href) 
+	    throws IOException {
+	target
+	.td(class_(cssclass))
+	  .a(href(href))
+	    .write(content)
+	  ._a()
+	._td();
     }
     
 }

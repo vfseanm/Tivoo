@@ -14,11 +14,16 @@ public class TivooController {
     }
     
     public List<TivooEvent> doFilterByKeyword(List<TivooEvent> eventlist, String keyword) {
-	return Filter.filterByKeyword(eventlist, keyword);
+	return Filter.filterByKeywordTitle(eventlist, keyword);
+    }
+    
+    public List<TivooEvent> doFilterByKeywordsAttributes(List<TivooEvent> eventlist, 
+	    Set<String> keywords, boolean retain) {
+	return Filter.filterByKeywordsAttributes(eventlist, keywords, retain);
     }
     
     public void doWriteVerticalTable(List<TivooEvent> eventlist, String outputsummary, 
-	    String outputdetails, DateTime startdate, DateTime enddate) {
+	    String outputdetails) {
 	try {
 	    new VerticalTableWriter().write(eventlist, outputsummary, outputdetails);
 	} catch (IOException e) {

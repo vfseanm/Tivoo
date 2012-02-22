@@ -1,4 +1,5 @@
 package writers;
+
 import static org.rendersnake.HtmlAttributesFactory.*;
 import java.io.*;
 import java.util.*;
@@ -34,7 +35,11 @@ public class DetailPageWriter extends TivooWriter {
 	        .td().write(e.getDescription())._td()
 	     ._tr()
 	      .tr()
-	         .td(class_("back")).a(href("../../" + outputsummary)).write("Back to summary")._a()._td()
+	         .td(class_("back"))
+	           .a(href("../../" + outputsummary))
+	             .write("Back to summary").
+	           _a()
+	         ._td()
 	     ._tr()
 	  ._table()
 	 ._body()

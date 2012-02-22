@@ -1,13 +1,8 @@
 package parsers;
 
-import java.util.HashMap;
-import java.util.List;
-
-import model.TivooEvent;
-import model.TivooException;
-
-import org.dom4j.Document;
-import org.dom4j.Node;
+import java.util.*;
+import model.*;
+import org.dom4j.*;
 
 public abstract class TivooParser {
 
@@ -18,8 +13,6 @@ public abstract class TivooParser {
 	pollutant.put("&amp;", "&");
 	pollutant.put("&#39;", "'");
     }
-    
-    public abstract List<TivooEvent> convertToList(Document doc);
     
     protected String sanitizeString(String polluted) {
 	for (String s: pollutant.keySet())
@@ -34,4 +27,21 @@ public abstract class TivooParser {
 	return selected;
     }
     
+    protected List<Node> trySelectNodes(Document doc, String xpath) {
+	@SuppressWarnings("unchecked")
+	List<Node> list = doc.selectNodes(xpath);
+	if (list.isEmpty()) 
+	   throw new TivooException("Malformated!", TivooException.Type.BAD_FORMAT); 
+	return list;
+    }
+    
+    protected String getNodeStringValue(Node n, String xpath) {
+	Node field = trySelectSingleNode(n, xpath);
+	return field.getStringValue();
+    }
+    
+    public abstract List<TivooEvent> convertToList(Document doc);
+    
+    public abstract boolean wellFormed(Document doc);
+
 }

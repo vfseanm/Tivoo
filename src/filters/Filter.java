@@ -18,11 +18,24 @@ public class Filter {
 	return filtered;
     }
     
-    public static List<TivooEvent> filterByKeyword(List<TivooEvent> eventlist, String keyword) {
+    public static List<TivooEvent> filterByKeywordTitle(List<TivooEvent> eventlist, String keyword) {
 	List<TivooEvent> filtered = new ArrayList<TivooEvent>();
 	for (TivooEvent e: eventlist) {
 	    if (e.getTitle().toLowerCase().contains(keyword.toLowerCase())) 
 		filtered.add(e);
+	}
+	return filtered;
+    }
+    
+    public static List<TivooEvent> filterByKeywordsAttributes(List<TivooEvent> eventlist, 
+	    Set<String> keywords, boolean retain) {
+	List<TivooEvent> filtered = new ArrayList<TivooEvent>();
+	for (TivooEvent e: eventlist) {
+	    for (String keyword: keywords) {
+		if ((e.hasKeyWord(keyword) && retain) || 
+			(!e.hasKeyWord(keyword) && !retain))
+		    filtered.add(e);
+	    }
 	}
 	return filtered;
     }
