@@ -1,7 +1,7 @@
+import org.joda.time.*;
 import model.*;
 import view.*;
-
-import javax.swing.JFrame;
+import controller.TivooController;
 
 public class Main {
 
@@ -9,7 +9,7 @@ public class Main {
     public static final String DEFAULT_START_PAGE = "http://www.cs.duke.edu/rcd";
     
     public static void main(String[] args) {
-	TivooModel model = new TivooModel();
+	TivooController controller = new TivooController(); 
     	// create program specific components
         //TivooViewer display = new TivooViewer(model);
         // create container that will work with Window manager
@@ -20,9 +20,15 @@ public class Main {
 	
 	String input = "dukecal.xml", outputsummary = "output/testhtml.html", 
 		outputdetails = "output/details/";
+	DateTime startdate = TivooTimeHandler.createTimeUTC("20110301T0000");
+	DateTime enddate = startdate.plusDays(180);
 	try {
-	    model.initialize(input, outputsummary, outputdetails);	
-	} catch (Exception e) {
+		controller.read(input);
+		//controller.filterByTime(startdate, enddate);
+		//controller.filterByKeyword("Duke");
+		controller.doWriteVerticalTable(outputsummary, outputdetails);
+	} 
+	catch (Exception e) {
 	    e.printStackTrace();
 	}
 	
