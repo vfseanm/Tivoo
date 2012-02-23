@@ -22,7 +22,7 @@ public class Main {
 	DateTime startdate = TivooTimeHandler.createTimeUTC("20110601T000000Z");
 	DateTime enddate = startdate.plusDays(180);
 	try {
-		controller.read(input);
+		controller.doRead(input);
 		controller.doFilterByTime(startdate, enddate);
 		controller.doFilterByKeywordTitle("Meet");
 		controller.doWriteVerticalTable(outputsummary, outputdetails);
