@@ -25,7 +25,7 @@ public class DetailPageWriter extends TivooWriter {
 	HtmlCanvas detail = new HtmlCanvas(detailwriter);
 	detail
 	.html();
-	  writeHeadWithCSS(detail, "styles/detail_page_style.css");
+	  writeHeadWithCSS(detail, "../styles/detail_page_style.css");
 	  detail.body().write("\n")
 	    .table(width("70%").align("center"))
 	      .tr()

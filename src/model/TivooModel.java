@@ -12,24 +12,22 @@ public class TivooModel {
     private List<TivooEvent> eventlist;
     private List<TivooEvent> filteredlist;
     
-    public void writeVerticalTable(String outputsummary, 
-	    String outputdetails) {
-    	try {
-    	    new VerticalTableWriter().write(filteredlist, outputsummary, outputdetails);
-    	} catch (IOException e) {
-    	    e.printStackTrace();
-    	}
+    public List<TivooEvent> getFilteredList() {
+	return filteredlist;
     }
     
-    public void read(String input) throws DocumentException {
-    	eventlist = TivooReader.read(input);
-    	filteredlist = new ArrayList<TivooEvent>();
-    	Collections.copy(filteredlist, eventlist);
+    public List<TivooEvent> getOriginalList() {
+	return eventlist;
     }
     
     public void clearFilter() {
 	filteredlist.clear();
     	Collections.copy(filteredlist, eventlist);
+    }
+    
+    public void read(String input) throws DocumentException {
+    	eventlist = TivooReader.read(input);
+    	filteredlist = new ArrayList<TivooEvent>(eventlist);
     }
     
     public void filterByTime(DateTime startdate, DateTime enddate) {

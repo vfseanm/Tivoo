@@ -11,12 +11,11 @@ public abstract class TivooWriter {
     public abstract void write(List<TivooEvent> eventlist, String outputsummary, String outputdetails)
 	    throws IOException;
     
-    protected void doWriteDetailPage(TivooEvent e, String outputsummary)
+    protected void doWriteDetailPage(TivooEvent e, String outputsummary, String outputdetails)
 	    throws IOException {
 	List<TivooEvent> oneevent = new ArrayList<TivooEvent>();
 	oneevent.add(e);
-	new DetailPageWriter().write(oneevent, outputsummary, 
-		buildDetailURL(e));
+	new DetailPageWriter().write(oneevent, outputsummary, outputdetails + buildDetailURL(e));
     }
     
     protected void writeHeadWithCSS(HtmlCanvas target, String stylefile) throws IOException {

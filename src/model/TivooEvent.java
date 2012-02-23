@@ -10,14 +10,15 @@ public class TivooEvent {
     }
     
     private HashSet<String> myAttributes;
-    
     private String myTitle;
     private DateTime myStart;
     private DateTime myEnd;
     private String myDescription;
+    private event_type myType;
     
-    public TivooEvent(String title, DateTime starttime, DateTime endtime, String description) {
+    public TivooEvent(event_type type, String title, String description, DateTime starttime, DateTime endtime) {
 	myAttributes = new HashSet<String>();
+	myType = type;
 	myTitle = title;
 	myStart = starttime;
 	myEnd = endtime;
@@ -28,6 +29,10 @@ public class TivooEvent {
     
     public Set<String> getAttributes() {
 	return Collections.unmodifiableSet(myAttributes);
+    }
+    
+    public event_type getType() {
+	return myType;
     }
     
     public String getTitle() {
@@ -70,7 +75,8 @@ public class TivooEvent {
     
     public boolean equals(Object o) {
 	TivooEvent other = (TivooEvent) o;
-	return (myTitle.equals(other.getTitle()) &&
+	return (myType.equals(other.getType()) &&
+		myTitle.equals(other.getTitle()) &&
 		myStart.equals(other.getStart()) &&
 		myEnd.equals(other.getEnd()) &&
 		myDescription.equals(other.getDescription()));

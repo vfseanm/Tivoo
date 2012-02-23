@@ -1,23 +1,34 @@
 package parsers;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
 import org.dom4j.*;
 import org.joda.time.*;
+
 import model.*;
 
 public class DukeCalParser extends TivooParser {
     
-    public List<TivooEvent> convertToList(Document doc) {
-	List<Node> list = trySelectNodes(doc, "//*[name()='event']");
-	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
-	for (Node n: list) {
-	    String title = getNodeStringValue(n, "./*[name()='summary']");
-	    String description = getNodeStringValue(n, "./*[name()='description']");
-	    DateTime starttime = parseTime(n, "./start/*[name()='utcdate']");
-	    DateTime endtime = parseTime(n, "./end/*[name()='utcdate']");
-	    eventlist.add(new TivooEvent(title, starttime, endtime, description));
-	}
-	return eventlist;
+    public DukeCalParser() {
+	setEventNodePath("//*[name()='event']");
+	setEventType(TivooEvent.event_type.DUKE_EVENT);
+	updateNoNeedParseMap(attribute_type.TITLE, "./*[name()='summary']");
+	updateNoNeedParseMap(attribute_type.DESCRIPTION, "./*[name()='description']");
+    }
+    
+    protected void topLevelParsing(Document doc) {}
+    
+    protected void eventLevelParsing(Node n, Map<attribute_type, Object> grabdatamap,
+	    List<List<DateTime>> recurringstartend) {
+	DateTime starttime = parseTime(n, "./start/*[name()='utcdate']");
+	DateTime endtime = parseTime(n, "./end/*[name()='utcdate']");
+	grabdatamap.put(attribute_type.STARTTIME, starttime);
+	grabdatamap.put(attribute_type.ENDTIME, endtime);
+    }
+    
+    protected List<TivooEvent> getRecurringEvents() {
+	return null;
     }
     
     public boolean wellFormed(Document doc) {
@@ -29,5 +40,5 @@ public class DukeCalParser extends TivooParser {
 	String timestring = getNodeStringValue(n, xpath);
 	return TivooTimeHandler.createTimeUTC(timestring);
     }
-    
+
 }

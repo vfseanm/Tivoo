@@ -8,26 +8,30 @@ import model.*;
 
 public class GoogleCalParser extends TivooParser {
 
-    public List<TivooEvent> convertToList(Document doc) {
-	List<Node> list = trySelectNodes(doc, "//*[name()='entry']");
-	String timezone = 
-	  ((Element) doc.selectSingleNode("//*[name()='gCal:timezone']")).attributeValue("value");
-	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
-	for (Node n: list) {
-	    String title = getNodeStringValue(n, "./*[name()='title']");
-	    String description = getNodeStringValue(n, "./*[name()='content']");
-	    Node timefield = trySelectSingleNode(n, "./*[name()='summary']");
-	    String timestring = timefield.getStringValue();
-	    if (timestring.startsWith("Recurring")) {
-		parseRecurringEvent();
-		continue;
-	    }
-	    List<DateTime> startend = parseOneTimeEvent(timestring, timezone);
-	    if (startend == null) continue;
-	    eventlist.add(new TivooEvent(sanitizeString(title), startend.get(0), startend.get(1), 
-		    sanitizeString(description)));
+    private DateTimeZone timezone;
+    
+    public GoogleCalParser() {
+	setEventNodePath("//*[name()='entry']");
+	setEventType(TivooEvent.event_type.GOOGLE_EVENT);
+	updateNoNeedParseMap(attribute_type.TITLE, "./*[name()='title']");
+	updateNoNeedParseMap(attribute_type.DESCRIPTION, "./*[name()='content']");
+    }
+    
+    protected void topLevelParsing(Document doc) {
+	 timezone = DateTimeZone.forID(((Element) doc.selectSingleNode("//*[name()='gCal:timezone']"))
+		.attributeValue("value"));
+    }
+    
+    protected void eventLevelParsing(Node n, Map<attribute_type, Object> grabdatamap,
+	    List<List<DateTime>> recurringstartend) {
+	String timestring = sanitizeString(getNodeStringValue(n, "./*[name()='summary']"));
+	if (timestring.startsWith("Recurring")) {
+	    recurringstartend.addAll(parseRecurringEvent(timestring));
+	    return;
 	}
-	return eventlist;
+	List<DateTime> startend = parseOneTimeEvent(timestring);
+	grabdatamap.put(attribute_type.STARTTIME, startend.get(0));
+	grabdatamap.put(attribute_type.ENDTIME, startend.get(1));
     }
     
     public boolean wellFormed(Document doc) {
@@ -35,15 +39,24 @@ public class GoogleCalParser extends TivooParser {
     	return (rootname.contentEquals("feed"));
     }
     
-    private List<DateTime> parseOneTimeEvent(String timestring, String timezone) {
-	DateTimeZone thezone = DateTimeZone.forID(timezone);
-	String[] splitted = timestring.split(" ");
-	if (splitted.length < 8) return null;
-	//When: Wed Sep 21, 2011 5:30pm to 6pm&nbsp; EDT<br> <br>Event Status: confirmed
+    private String[] fixTime(String[] splitted) {
+	//When: Wed Sep 21, 2011 EDT Event Status: confirmed
+	String[] fixed = new String[8];
+	for (int i = 0; i < splitted.length; i++) fixed[i] = splitted[i];
+	fixed[5] =  "12:01am"; fixed[7] = "11:59pm";
+	return fixed;
+    }
+    
+    private List<DateTime> parseOneTimeEvent(String timestring) {
+	String[] splitted = timestring.split("\\s+");
+	if (splitted.length < 12)
+	    splitted = Arrays.copyOf(fixTime(splitted), 8);
+	//When: Wed Sep 21, 2011 5:30pm to 6pm EDT Event Status: confirmed
 	String month = splitted[2], 
-		date = splitted[3].substring(0, splitted[3].length() - 1), 
-		year = splitted[4], starttime = splitted[5], 
-		endtime = splitted[7].split("&")[0];
+		date = splitted[3].replaceAll(",", ""), 
+		year = splitted[4], 
+		starttime = splitted[5], 
+		endtime = splitted[7];
 	DateTimeFormatter monthformat = DateTimeFormat.forPattern("MMM");
 	int _month = monthformat.parseDateTime(month).getMonthOfYear();
 	int _date = Integer.parseInt(date);
@@ -58,17 +71,36 @@ public class GoogleCalParser extends TivooParser {
 	int _endhour = hourformat.parseDateTime(endtime).getHourOfDay();
 	int _endminute = hourformat.parseDateTime(endtime).getMinuteOfHour();
 	DateTime start = new DateTime(_year, _month, 
-		_date, _starthour, _startminute, thezone);
+		_date, _starthour, _startminute, timezone);
 	DateTime end = new DateTime(_year, _month, 
-		_date, _endhour, _endminute, thezone);
+		_date, _endhour, _endminute, timezone);
 	List<DateTime> toreturn = new ArrayList<DateTime>();
 	toreturn.add(start); toreturn.add(end);
 	return toreturn;
     }
     
-    private DateTime parseRecurringEvent() {
-	//TODO
-	return null;
+    private List<List<DateTime>> parseRecurringEvent (String timestring) {
+	List<DateTime> recurringstart = new ArrayList<DateTime>();
+	List<DateTime> recurringend = new ArrayList<DateTime>();
+	//Recurring Event First start: 2011-08-30 15:00:00 EDT Duration: 3600 Event Status: confirmed
+	String[] splitted = timestring.split("\\s+");
+	String starttime = splitted[4].concat(splitted[5]);
+	DateTimeFormatter formatter = DateTimeFormat.forPattern("YYYY-MM-ddHH:mm:ss")
+		.withZone(timezone);
+	DateTime firststart = formatter.parseDateTime(starttime);
+	int durationsec = Integer.parseInt(splitted[8]);
+	DateTime firstend = firststart.plusSeconds(durationsec);
+	for (int i = 0; i < 52; i++) {
+	    DateTime tempstart = new DateTime(firststart);
+	    DateTime tempend = new DateTime(firstend);
+	    recurringstart.add(tempstart);
+	    recurringend.add(tempend);
+	    firststart = firststart.plusWeeks(1);
+	    firstend = firstend.plusWeeks(1);
+	}
+	List<List<DateTime>> toreturn = new ArrayList<List<DateTime>>();
+	toreturn.add(recurringstart); toreturn.add(recurringend);
+	return toreturn;
     }
-    
+
 }

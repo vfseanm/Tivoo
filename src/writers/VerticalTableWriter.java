@@ -36,7 +36,7 @@ public class VerticalTableWriter extends TivooWriter {
 		    ._a()
 		  ._td().write("\n")
 		._tr().write("\n");
-		doWriteDetailPage(e, outputsummary);
+		doWriteDetailPage(e, outputsummary, outputdetails);
 	    }
 	    summary._table().write("\n")
 	  ._body()

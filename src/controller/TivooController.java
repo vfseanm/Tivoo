@@ -1,8 +1,11 @@
 package controller;
 
+import java.io.IOException;
 import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
+
+import writers.VerticalTableWriter;
 import model.*;
 
 public class TivooController {
@@ -32,7 +35,11 @@ public class TivooController {
     
     public void doWriteVerticalTable(String outputsummary, 
 	    String outputdetails) {
-	myModel.writeVerticalTable(outputsummary, outputdetails);
+	try {
+	    new VerticalTableWriter().write(myModel.getFilteredList(), outputsummary, outputdetails);
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
     }
     
 }

@@ -18,9 +18,9 @@ public class Main {
         // start somewhere, less typing for debugging
         //display.showPage(DEFAULT_START_PAGE);
 	
-	String input = "dukecal.xml", outputsummary = "output/testhtml.html", 
-		outputdetails = "output/details/";
-	DateTime startdate = TivooTimeHandler.createTimeUTC("20110301T0000");
+	String input = "googlecal.xml", outputsummary = "output/testhtml_google.html", 
+		outputdetails = "output/details_google/";
+	DateTime startdate = TivooTimeHandler.createTimeUTC("20110301T000000Z");
 	DateTime enddate = startdate.plusDays(180);
 	try {
 		controller.read(input);
