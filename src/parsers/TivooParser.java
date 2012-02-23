@@ -11,8 +11,7 @@ public abstract class TivooParser {
 	TITLE, DESCRIPTION, STARTTIME, ENDTIME
     }
     
-    private Map<attribute_type, String> noneedparsemap 
-    	= new HashMap<attribute_type, String>();
+    private Map<attribute_type, String> noneedparsemap = new HashMap<attribute_type, String>();
     private String eventnodepath;
     private TivooEvent.event_type eventtype;
     
@@ -89,16 +88,11 @@ public abstract class TivooParser {
 			(String) grabdatamap.get(attribute_type.TITLE),
 			(String) grabdatamap.get(attribute_type.DESCRIPTION),
 			(DateTime) grabdatamap.get(attribute_type.STARTTIME),
-			(DateTime) grabdatamap.get(attribute_type.ENDTIME))
-		);
-		if(eventlist.get(eventlist.size() - 1).getStart() == null) {
-		    TivooEvent e = eventlist.get(eventlist.size() - 1);
-		    System.out.println(e.getTitle());
-		}
+			(DateTime) grabdatamap.get(attribute_type.ENDTIME)
+		));
 	    }
-	    else {
+	    else 
 		eventlist.addAll(buildRecurringEvents(grabdatamap, recurringstartend));
-	    }
 	}
 	return eventlist;
     }
@@ -112,8 +106,8 @@ public abstract class TivooParser {
 		    (String) grabdatamap.get(attribute_type.TITLE),
 		    (String) grabdatamap.get(attribute_type.DESCRIPTION),
 		    recurringstartend.get(0).get(i),
-		    recurringstartend.get(1).get(i))
-	    );
+		    recurringstartend.get(1).get(i)
+	    ));
 	}
 	return augmentlist;
     }

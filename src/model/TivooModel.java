@@ -1,11 +1,9 @@
 package model;
 
-import java.io.*;
 import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
-import writers.*;
-import filters.Filter;
+import filters.*;
 
 public class TivooModel {
 
@@ -13,11 +11,11 @@ public class TivooModel {
     private List<TivooEvent> filteredlist;
     
     public List<TivooEvent> getFilteredList() {
-	return filteredlist;
+	return new ArrayList<TivooEvent>(filteredlist);
     }
     
     public List<TivooEvent> getOriginalList() {
-	return eventlist;
+	return Collections.unmodifiableList(eventlist);
     }
     
     public void clearFilter() {

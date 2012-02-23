@@ -37,8 +37,8 @@ public class DetailPageWriter extends TivooWriter {
 	      .tr()
 	         .td(class_("back"))
 	           .a(href("../../" + outputsummary))
-	             .write("Back to summary").
-	           _a()
+	             .write("Back to summary")
+	           ._a()
 	         ._td()
 	     ._tr()
 	  ._table()

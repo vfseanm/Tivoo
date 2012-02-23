@@ -1,11 +1,8 @@
 package parsers;
 
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
-
 import model.*;
 
 public class DukeCalParser extends TivooParser {
@@ -25,10 +22,6 @@ public class DukeCalParser extends TivooParser {
 	DateTime endtime = parseTime(n, "./end/*[name()='utcdate']");
 	grabdatamap.put(attribute_type.STARTTIME, starttime);
 	grabdatamap.put(attribute_type.ENDTIME, endtime);
-    }
-    
-    protected List<TivooEvent> getRecurringEvents() {
-	return null;
     }
     
     public boolean wellFormed(Document doc) {

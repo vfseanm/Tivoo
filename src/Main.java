@@ -1,12 +1,11 @@
 import org.joda.time.*;
 import model.*;
-import view.*;
-import controller.TivooController;
+import controller.*;
 
 public class Main {
 
-    public static final String TITLE = "TivooBrowser";
-    public static final String DEFAULT_START_PAGE = "http://www.cs.duke.edu/rcd";
+    //public static final String TITLE = "TivooBrowser";
+    //public static final String DEFAULT_START_PAGE = "http://www.cs.duke.edu/rcd";
     
     public static void main(String[] args) {
 	TivooController controller = new TivooController(); 
@@ -20,12 +19,12 @@ public class Main {
 	
 	String input = "googlecal.xml", outputsummary = "output/testhtml_google.html", 
 		outputdetails = "output/details_google/";
-	DateTime startdate = TivooTimeHandler.createTimeUTC("20110301T000000Z");
+	DateTime startdate = TivooTimeHandler.createTimeUTC("20110601T000000Z");
 	DateTime enddate = startdate.plusDays(180);
 	try {
 		controller.read(input);
-		//controller.filterByTime(startdate, enddate);
-		//controller.filterByKeyword("Duke");
+		controller.doFilterByTime(startdate, enddate);
+		controller.doFilterByKeywordTitle("Meet");
 		controller.doWriteVerticalTable(outputsummary, outputdetails);
 	} 
 	catch (Exception e) {

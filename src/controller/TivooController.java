@@ -20,11 +20,11 @@ public class TivooController {
     	myModel.read(input);
     }
     
-    public void dofilterByTime(DateTime startdate, DateTime enddate) {
+    public void doFilterByTime(DateTime startdate, DateTime enddate) {
     	myModel.filterByTime(startdate, enddate);
     }
     
-    public void dofilterByKeywordTitle(String keyword) {
+    public void doFilterByKeywordTitle(String keyword) {
     	myModel.filterByKeywordTitle(keyword);
 
     }
