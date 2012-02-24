@@ -16,7 +16,7 @@ public class TivooController {
 	myModel = new TivooModel();
     }
     
-    public void read(String input) throws DocumentException {
+    public void doRead(String input) throws DocumentException {
     	myModel.read(input);
     }
     

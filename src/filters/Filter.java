@@ -32,12 +32,15 @@ public class Filter {
 	List<TivooEvent> filtered = new ArrayList<TivooEvent>();
 	for (TivooEvent e: eventlist) {
 	    for (String keyword: keywords) {
-		if ((e.hasKeyWord(keyword) && retain) || 
-			(!e.hasKeyWord(keyword) && !retain))
+		if ((e.hasKeyWord(keyword, false) && retain) || 
+			(!e.hasKeyWord(keyword, false) && !retain))
 		    filtered.add(e);
 	    }
 	}
 	return filtered;
     }
+    
+    
+    
     
 }

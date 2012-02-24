@@ -1,9 +1,13 @@
 package parsers;
 
 import java.util.*;
+
 import org.dom4j.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
+
+import sharedattributes.*;
+
 import model.*;
 
 public class GoogleCalParser extends TivooParser {
@@ -12,9 +16,9 @@ public class GoogleCalParser extends TivooParser {
     
     public GoogleCalParser() {
 	setEventNodePath("//*[name()='entry']");
-	setEventType(TivooEvent.event_type.GOOGLE_EVENT);
-	updateNoNeedParseMap(attribute_type.TITLE, "./*[name()='title']");
-	updateNoNeedParseMap(attribute_type.DESCRIPTION, "./*[name()='content']");
+	setEventType(new GoogleCalEventType());
+	updateNoNeedParseMap(new Title(), "./*[name()='title']");
+	updateNoNeedParseMap(new Description(), "./*[name()='content']");
     }
     
     protected void topLevelParsing(Document doc) {
@@ -22,7 +26,7 @@ public class GoogleCalParser extends TivooParser {
 		.attributeValue("value"));
     }
     
-    protected void eventLevelParsing(Node n, Map<attribute_type, Object> grabdatamap,
+    protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
 	    List<List<DateTime>> recurringstartend) {
 	String timestring = sanitizeString(getNodeStringValue(n, "./*[name()='summary']"));
 	if (timestring.startsWith("Recurring")) {
@@ -30,8 +34,8 @@ public class GoogleCalParser extends TivooParser {
 	    return;
 	}
 	List<DateTime> startend = parseOneTimeEvent(timestring);
-	grabdatamap.put(attribute_type.STARTTIME, startend.get(0));
-	grabdatamap.put(attribute_type.ENDTIME, startend.get(1));
+	grabdatamap.put(new StartTime(), startend.get(0));
+	grabdatamap.put(new EndTime(), startend.get(1));
     }
     
     public boolean wellFormed(Document doc) {
@@ -102,5 +106,7 @@ public class GoogleCalParser extends TivooParser {
 	toreturn.add(recurringstart); toreturn.add(recurringend);
 	return toreturn;
     }
+    
+    private class GoogleCalEventType extends TivooEventType {}
 
 }

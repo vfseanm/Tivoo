@@ -4,6 +4,7 @@ import static org.rendersnake.HtmlAttributesFactory.*;
 import java.io.*;
 import java.util.*;
 import org.rendersnake.HtmlCanvas;
+import sharedattributes.*;
 import model.*;
 
 public class DetailPageWriter extends TivooWriter {
@@ -33,8 +34,14 @@ public class DetailPageWriter extends TivooWriter {
 	     ._tr()
 	      .tr()
 	        .td().write(e.getDescription())._td()
-	     ._tr()
-	      .tr()
+	     ._tr();
+	     Map<TivooAttribute, Object> specialAttributes = e.getSpecialAttributes();
+	     for (TivooAttribute attr: specialAttributes.keySet()) {
+		 detail.tr()
+		    .td().write(attr.toString() + ": " + specialAttributes.get(attr).toString())._td()
+		 ._tr();
+	     }
+	      detail.tr()
 	         .td(class_("back"))
 	           .a(href("../../" + outputsummary))
 	             .write("Back to summary")

@@ -1,27 +1,31 @@
 package parsers;
 
 import java.util.*;
+
 import org.dom4j.*;
 import org.joda.time.*;
+
+import sharedattributes.*;
 import model.*;
 
 public class DukeCalParser extends TivooParser {
     
     public DukeCalParser() {
 	setEventNodePath("//*[name()='event']");
-	setEventType(TivooEvent.event_type.DUKE_EVENT);
-	updateNoNeedParseMap(attribute_type.TITLE, "./*[name()='summary']");
-	updateNoNeedParseMap(attribute_type.DESCRIPTION, "./*[name()='description']");
+	setEventType(new DukeCalEventType());
+	updateNoNeedParseMap(new Title(), "./*[name()='summary']");
+	updateNoNeedParseMap(new Description(), "./*[name()='description']");
+	updateNoNeedParseMap(new Location(), "./location/*[name()='address']");
     }
     
     protected void topLevelParsing(Document doc) {}
     
-    protected void eventLevelParsing(Node n, Map<attribute_type, Object> grabdatamap,
+    protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
 	    List<List<DateTime>> recurringstartend) {
 	DateTime starttime = parseTime(n, "./start/*[name()='utcdate']");
 	DateTime endtime = parseTime(n, "./end/*[name()='utcdate']");
-	grabdatamap.put(attribute_type.STARTTIME, starttime);
-	grabdatamap.put(attribute_type.ENDTIME, endtime);
+	grabdatamap.put(new StartTime(), starttime);
+	grabdatamap.put(new EndTime(), endtime);
     }
     
     public boolean wellFormed(Document doc) {
@@ -34,4 +38,16 @@ public class DukeCalParser extends TivooParser {
 	return TivooTimeHandler.createTimeUTC(timestring);
     }
 
+    private class DukeCalEventType extends TivooEventType {
+	
+	private DukeCalEventType() {
+	    @SuppressWarnings("serial")
+	    Set<TivooAttribute> localSpecialAttributes = new HashSet<TivooAttribute>() {{
+		add(new Location());
+	    }};
+	    addSpecialAttributes(localSpecialAttributes);
+	}
+	
+    }
+    
 }

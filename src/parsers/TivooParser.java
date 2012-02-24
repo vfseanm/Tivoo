@@ -1,28 +1,30 @@
 package parsers;
 
 import java.util.*;
+
 import model.*;
+
 import org.dom4j.*;
 import org.joda.time.*;
 
-public abstract class TivooParser {
+import sharedattributes.*;
 
-    public static enum attribute_type {
-	TITLE, DESCRIPTION, STARTTIME, ENDTIME
-    }
+
+public abstract class TivooParser {
     
-    private Map<attribute_type, String> noneedparsemap = new HashMap<attribute_type, String>();
+    private Map<TivooAttribute, String> noneedparsemap = new HashMap<TivooAttribute, String>();
     private String eventnodepath;
-    private TivooEvent.event_type eventtype;
+    private TivooEventType eventtype;
     
     public abstract boolean wellFormed(Document doc);
 
     protected abstract void topLevelParsing(Document doc);
 
-    protected abstract void eventLevelParsing(Node n, Map<attribute_type, Object> grabdatamap
+    protected abstract void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap
 	    , List<List<DateTime>> recurringstartend);
     
     protected String getEventNodePath() {
+	
 	return eventnodepath;
     }
     
@@ -30,11 +32,11 @@ public abstract class TivooParser {
 	eventnodepath = path;
     }
     
-    protected void setEventType(TivooEvent.event_type type) {
+    protected void setEventType(TivooEventType type) {
 	eventtype = type;
     }
     
-    protected void updateNoNeedParseMap(attribute_type key, String value) {
+    protected void updateNoNeedParseMap(TivooAttribute key, String value) {
 	noneedparsemap.put(key, value);
     }
     
@@ -75,21 +77,16 @@ public abstract class TivooParser {
 	topLevelParsing(doc);
 	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
 	for (Node n: list) {
-	    HashMap<attribute_type, Object> grabdatamap = new HashMap<attribute_type, Object>();
+	    Map<TivooAttribute, Object> grabdatamap = new HashMap<TivooAttribute, Object>();
 	    List<List<DateTime>> recurringstartend = new ArrayList<List<DateTime>>();
-	    for (attribute_type t: noneedparsemap.keySet()) {
+	    for (TivooAttribute t: noneedparsemap.keySet()) {
 		String retrieved = getNodeStringValue(n, noneedparsemap.get(t));
 		grabdatamap.put(t, sanitizeString(retrieved));
 	    }
 	    eventLevelParsing(n, grabdatamap, recurringstartend);
 	    if (recurringstartend.isEmpty()) {
-		eventlist.add(new TivooEvent(
-			eventtype,
-			(String) grabdatamap.get(attribute_type.TITLE),
-			(String) grabdatamap.get(attribute_type.DESCRIPTION),
-			(DateTime) grabdatamap.get(attribute_type.STARTTIME),
-			(DateTime) grabdatamap.get(attribute_type.ENDTIME)
-		));
+		eventlist.add(new TivooEvent(eventtype,
+			new HashMap<TivooAttribute, Object>(grabdatamap)));
 	    }
 	    else 
 		eventlist.addAll(buildRecurringEvents(grabdatamap, recurringstartend));
@@ -97,17 +94,14 @@ public abstract class TivooParser {
 	return eventlist;
     }
     
-    private List<TivooEvent> buildRecurringEvents(Map<attribute_type, Object> grabdatamap,
+    private List<TivooEvent> buildRecurringEvents(Map<TivooAttribute, Object> grabdatamap,
 	    List<List<DateTime>> recurringstartend) {
 	List<TivooEvent> augmentlist = new ArrayList<TivooEvent>();
 	for (int i = 0; i < recurringstartend.get(0).size(); i++) {
-	    augmentlist.add(new TivooEvent(
-		    eventtype,
-		    (String) grabdatamap.get(attribute_type.TITLE),
-		    (String) grabdatamap.get(attribute_type.DESCRIPTION),
-		    recurringstartend.get(0).get(i),
-		    recurringstartend.get(1).get(i)
-	    ));
+	    Map<TivooAttribute, Object> toadd = new HashMap<TivooAttribute, Object>(grabdatamap);
+	    toadd.put(new StartTime(), recurringstartend.get(0).get(i));
+	    toadd.put(new EndTime(), recurringstartend.get(1).get(i));
+	    augmentlist.add(new TivooEvent(eventtype, toadd));
 	}
 	return augmentlist;
     }

@@ -3,35 +3,39 @@ package model;
 import java.util.*;
 import org.joda.time.*;
 
+import sharedattributes.*;
+
 public class TivooEvent {
 
-    public enum event_type {
-	DUKE_EVENT, GOOGLE_EVENT, TV_EVENT;
-    }
-    
-    private HashSet<String> myAttributes;
+    private TivooEventType myType;
+    private Map<TivooAttribute, Object> myCommonAttributes;
+    private Map<TivooAttribute, Object> mySpecialAttributes;
     private String myTitle;
+    private String myDescription;
     private DateTime myStart;
     private DateTime myEnd;
-    private String myDescription;
-    private event_type myType;
     
-    public TivooEvent(event_type type, String title, String description, DateTime starttime, DateTime endtime) {
-	myAttributes = new HashSet<String>();
-	myType = type;
-	myTitle = title;
-	myStart = starttime;
-	myEnd = endtime;
-	myDescription = description;
-	myAttributes.add(myTitle.toLowerCase());
-	myAttributes.add(myDescription.toLowerCase());
+    public TivooEvent(TivooEventType type, Map<TivooAttribute, Object> attributes) {
+	myCommonAttributes = new HashMap<TivooAttribute, Object>();
+	mySpecialAttributes = new HashMap<TivooAttribute, Object>();
+	Set<TivooAttribute> specialattributes = type.getSpecialAttributes();
+	for (TivooAttribute t: attributes.keySet()) {
+	    if (specialattributes.contains(t))
+		mySpecialAttributes.put(t, attributes.get(t));
+	    else
+		myCommonAttributes.put(t, attributes.get(t));
+	}
+	myTitle = (String) myCommonAttributes.get(new Title());
+	myDescription = (String) myCommonAttributes.get(new Description());
+	myStart = (DateTime) myCommonAttributes.get(new StartTime());
+	myEnd = (DateTime) myCommonAttributes.get(new EndTime());
     }
     
-    public Set<String> getAttributes() {
-	return Collections.unmodifiableSet(myAttributes);
+    public Map<TivooAttribute, Object> getSpecialAttributes() {
+	return Collections.unmodifiableMap(mySpecialAttributes);
     }
     
-    public event_type getType() {
+    public TivooEventType getType() {
 	return myType;
     }
     
@@ -61,15 +65,18 @@ public class TivooEvent {
 		(getStart().compareTo(other.getEnd()) < 0 && other.getEnd().compareTo(getEnd()) <= 0));*/
     }
     
-    public boolean hasKeyWord(String keyword) {
+    public boolean hasKeyWord(String keyword, boolean special) {
 	String lower = keyword.toLowerCase();
-	for (String s: getAttributes())
-	    if (s.contains(lower)) return true;
+	Map<TivooAttribute, Object> usedmap = (special == true ?
+		mySpecialAttributes : myCommonAttributes);
+	for (TivooAttribute t: usedmap.keySet())
+	    if (usedmap.get(t).toString().contains(lower)) return true;
 	return false;
     }
     
     public boolean isLongEvent() {
-	if (Hours.hoursBetween(getStart(), getEnd()).getHours() > 24) return true;
+	if (Hours.hoursBetween(getStart(), getEnd()).getHours() > 24)
+	    return true;
 	return false;
     }
     

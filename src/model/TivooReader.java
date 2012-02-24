@@ -7,10 +7,12 @@ import parsers.*;
 
 public class TivooReader {
 
-    private static ArrayList<TivooParser> parsers = new ArrayList<TivooParser>();
+    private static List<TivooParser> parsers = new ArrayList<TivooParser>();
     static {
 	parsers.add(new DukeCalParser());
 	parsers.add(new GoogleCalParser());
+	parsers.add(new DukeBasketBallParser());
+	parsers.add(new TVParser());
     }
     
     public static List<TivooEvent> read(String input) throws DocumentException {

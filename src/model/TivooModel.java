@@ -10,6 +10,10 @@ public class TivooModel {
     private List<TivooEvent> eventlist;
     private List<TivooEvent> filteredlist;
     
+    public TivooModel() {
+	eventlist = new ArrayList<TivooEvent>();
+	filteredlist = new ArrayList<TivooEvent>();
+    }
     public List<TivooEvent> getFilteredList() {
 	return new ArrayList<TivooEvent>(filteredlist);
     }
@@ -23,8 +27,12 @@ public class TivooModel {
     	Collections.copy(filteredlist, eventlist);
     }
     
+    public void reset() {
+	eventlist.clear();
+    }
+    
     public void read(String input) throws DocumentException {
-    	eventlist = TivooReader.read(input);
+    	eventlist.addAll(TivooReader.read(input));
     	filteredlist = new ArrayList<TivooEvent>(eventlist);
     }
     

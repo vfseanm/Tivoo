@@ -17,14 +17,14 @@ public class Main {
         // start somewhere, less typing for debugging
         //display.showPage(DEFAULT_START_PAGE);
 	
-	String input = "googlecal.xml", outputsummary = "output/testhtml_google.html", 
-		outputdetails = "output/details_google/";
+	String input = "DukeBasketBall.xml", outputsummary = "output/testhtml_basketball.html", 
+		outputdetails = "output/details_basketball/";
 	DateTime startdate = TivooTimeHandler.createTimeUTC("20110601T000000Z");
 	DateTime enddate = startdate.plusDays(180);
 	try {
-		controller.read(input);
-		controller.doFilterByTime(startdate, enddate);
-		controller.doFilterByKeywordTitle("Meet");
+		controller.doRead(input);
+		//controller.doFilterByTime(startdate, enddate);
+		//controller.doFilterByKeywordTitle("Meet");
 		controller.doWriteVerticalTable(outputsummary, outputdetails);
 	} 
 	catch (Exception e) {
