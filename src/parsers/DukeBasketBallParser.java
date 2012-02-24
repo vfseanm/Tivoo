@@ -41,9 +41,7 @@ public class DukeBasketBallParser extends TivooParser {
     }
     
     private DateTime parseTime(String timestring) {
-	//<StartDate>11/11/2011</StartDate>
-	//<StartTime>9:00:00 PM</StartTime>
-	    DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/YYYY hh:mm:ss aa");
+	DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/YYYY hh:mm:ss aa");
 	return formatter.parseDateTime(timestring);
     }
 
