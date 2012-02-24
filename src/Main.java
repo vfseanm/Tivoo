@@ -23,8 +23,8 @@ public class Main {
 	DateTime enddate = startdate.plusDays(180);
 	try {
 		controller.doRead(input);
-		//controller.doFilterByTime(startdate, enddate);
-		//controller.doFilterByKeywordTitle("Meet");
+//		controller.doFilterByTime(startdate, enddate);
+//		controller.doFilterByKeywordTitle("Meet");
 		controller.doWriteVerticalTable(outputsummary, outputdetails);
 	} 
 	catch (Exception e) {
