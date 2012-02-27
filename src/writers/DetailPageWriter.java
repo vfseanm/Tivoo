@@ -1,9 +1,9 @@
 package writers;
 
-import static org.rendersnake.HtmlAttributesFactory.*;
 import java.io.*;
 import java.util.*;
-import org.rendersnake.HtmlCanvas;
+import org.joda.time.*;
+import org.rendersnake.*;
 import sharedattributes.*;
 import model.*;
 
@@ -22,36 +22,40 @@ public class DetailPageWriter extends TivooWriter {
     
     private void writeOneDetailPage(TivooEvent e, String outputsummary, String detailURL)
 	    throws IOException {
-	FileWriter detailwriter = new FileWriter(detailURL);
-	HtmlCanvas detail = new HtmlCanvas(detailwriter);
-	detail
-	.html();
-	  writeHeadWithCSS(detail, "../styles/detail_page_style.css");
-	  detail.body().write("\n")
-	    .table(width("70%").align("center"))
-	      .tr()
-	        .th(colspan("2").class_("title")).write(e.getTitle())._th().write("\n")
-	     ._tr()
-	      .tr()
-	        .td().write(e.getDescription())._td()
-	     ._tr();
-	     Map<TivooAttribute, Object> specialAttributes = e.getSpecialAttributes();
-	     for (TivooAttribute attr: specialAttributes.keySet()) {
-		 detail.tr()
-		    .td().write(attr.toString() + ": " + specialAttributes.get(attr).toString())._td()
-		 ._tr();
-	     }
-	      detail.tr()
-	         .td(class_("back"))
-	           .a(href("../../" + outputsummary))
-	             .write("Back to summary")
-	           ._a()
-	         ._td()
-	     ._tr()
-	  ._table()
-	 ._body()
-       ._html();
-       detailwriter.close();
+	FileWriter fw = new FileWriter(detailURL);
+	HtmlCanvas detail = new HtmlCanvas(fw);
+	startHtml(detail);
+	writeHeadWithCSS(detail, "../styles/detail_page.css");
+	startBody(detail);
+	startTable(detail, "", "70%", "center", "0", "0", "0");
+	startRow(detail);
+	writeTableHead(detail, "title", null,"1", "2", e.getTitle(), "");
+	endRow(detail);
+	startRow(detail);
+	writeTableCellLiteral(detail, "time", null, "1", "2", formatStartEnd(e.getStart(), e.getEnd()));
+	endRow(detail);
+	startRow(detail);
+	writeTableCellLiteral(detail, "", null, "1", "1", e.getDescription());
+	endRow(detail);
+	Map<TivooAttribute, Object> specialAttributes = e.getSpecialAttributes();
+	for (TivooAttribute attr: specialAttributes.keySet()) {
+	    startRow(detail);
+	    String towrite = attr.toString() + ": " + specialAttributes.get(attr).toString();
+	    writeTableCellLiteral(detail, "", null, "1", "1", towrite);
+	    endRow(detail);
+	}
+	startRow(detail);
+	writeTableCellLink(detail, "back", null, "1", "1", "Back to summary", 
+		"../../" + outputsummary);
+	endRow(detail);
+	endTable(detail);
+	endBody(detail);
+	endHtml(detail);
+	fw.close();
+    }
+    
+    private String formatStartEnd(DateTime start, DateTime end) {
+	return "Start: " + start.toString("HH:mm") + " End: " + end.toString("HH:mm");
     }
     
 }

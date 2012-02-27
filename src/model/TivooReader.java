@@ -3,6 +3,8 @@ import java.io.*;
 import java.util.*;
 import org.dom4j.*;
 import org.dom4j.io.*;
+import org.xml.sax.*;
+
 import parsers.*;
 
 public class TivooReader {
@@ -13,23 +15,39 @@ public class TivooReader {
 	parsers.add(new GoogleCalParser());
 	parsers.add(new DukeBasketBallParser());
 	parsers.add(new TVParser());
+	parsers.add(new NFLParser());
     }
     
-    public static List<TivooEvent> read(String input) throws DocumentException {
+    public static Document read(File input) {
 	SAXReader reader = new SAXReader();
-	Document doc = reader.read(new File(input));
-	TivooParser theparser = findParser(doc);
-	if (theparser == null)
-	    throw new TivooException("Malformed XML file!");
-	return theparser.convertToList(doc);
+	reader.setEntityResolver(new EntityResolver() {
+	    public InputSource resolveEntity(String publicID, String systemID) {
+		return new InputSource(new ByteArrayInputStream
+			("<?xml version='1.0' encoding='GBK'?>".getBytes()));  
+	    }
+	});
+	Document doc = null;
+	try {
+	    doc = reader.read(input);
+	} catch (DocumentException e) {
+	    e.printStackTrace();
+	}
+	return doc;
     }
     
-    private static TivooParser findParser(Document doc) {
+    public static List<TivooEvent> convertToList(Document doc, TivooParser p) {
+	return p.convertToList(doc);
+    }
+    
+    public static TivooParser findParser(Document doc) {
+	TivooParser theparser = null;
     	for(TivooParser p: parsers) {
     	    if (p.wellFormed(doc))
-    		return p;
+    		theparser = p;
     	}
-    	return null; 
+    	if (theparser == null)
+	    throw new TivooException("Malformed XML file!");
+    	return theparser;
     }
 
 }

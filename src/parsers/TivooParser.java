@@ -1,12 +1,9 @@
 package parsers;
 
 import java.util.*;
-
 import model.*;
-
 import org.dom4j.*;
 import org.joda.time.*;
-
 import sharedattributes.*;
 
 
@@ -18,6 +15,8 @@ public abstract class TivooParser {
     
     public abstract boolean wellFormed(Document doc);
 
+    public abstract TivooEventType getEventType();
+    
     protected abstract void topLevelParsing(Document doc);
 
     protected abstract void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap
@@ -60,8 +59,10 @@ public abstract class TivooParser {
     }
     
     protected List<Node> trySelectNodes(Document doc, String xpath) {
+	    System.out.println("wait one");
 	@SuppressWarnings("unchecked")
 	List<Node> list = doc.selectNodes(xpath);
+	    System.out.println("got one");
 	if (list.isEmpty()) 
 	   throw new TivooException("Malformated!", TivooException.Type.BAD_FORMAT); 
 	return list;
@@ -72,9 +73,34 @@ public abstract class TivooParser {
 	return field.getStringValue();
     }
     
-    public List<TivooEvent> convertToList(Document doc) {
-	List<Node> list = trySelectNodes(doc, getEventNodePath());
+    /*public List<TivooEvent> convertToList(Document doc) {
 	topLevelParsing(doc);
+	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
+	while (true) {
+	    Node n = doc.selectSingleNode(getEventNodePath());
+	   // System.out.println(n);
+	    if (n == null) break;
+	    Map<TivooAttribute, Object> grabdatamap = new HashMap<TivooAttribute, Object>();
+	    List<List<DateTime>> recurringstartend = new ArrayList<List<DateTime>>();
+	    for (TivooAttribute t: noneedparsemap.keySet()) {
+		String retrieved = getNodeStringValue(n, noneedparsemap.get(t));
+		grabdatamap.put(t, sanitizeString(retrieved));
+	    }
+	    eventLevelParsing(n, grabdatamap, recurringstartend);
+	    if (recurringstartend.isEmpty()) {
+		eventlist.add(new TivooEvent(eventtype,
+			new HashMap<TivooAttribute, Object>(grabdatamap)));
+	    }
+	    else 
+		eventlist.addAll(buildRecurringEvents(grabdatamap, recurringstartend));
+	    n.detach();
+	}
+	return eventlist;
+    }*/
+    
+    public List<TivooEvent> convertToList(Document doc) {
+	topLevelParsing(doc);
+	List<Node> list = trySelectNodes(doc, getEventNodePath());
 	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
 	for (Node n: list) {
 	    Map<TivooAttribute, Object> grabdatamap = new HashMap<TivooAttribute, Object>();

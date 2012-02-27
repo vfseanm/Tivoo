@@ -1,15 +1,34 @@
 package writers;
-import static org.rendersnake.HtmlAttributesFactory.*;
 
-import java.io.IOException;
-import model.TivooEvent;
-import org.rendersnake.HtmlCanvas;
+import static org.rendersnake.HtmlAttributesFactory.*;
+import java.io.*;
+import model.*;
+import org.rendersnake.*;
 import java.util.*;
 
 public abstract class TivooWriter {
 
     public abstract void write(List<TivooEvent> eventlist, String outputsummary, String outputdetails)
 	    throws IOException;
+    
+    protected FileWriter getSummaryFileWriter(String outputdetails, String outputsummary) 
+	    throws IOException {
+	if (!new File(outputdetails).isDirectory())
+	    throw new TivooException("Output path not a directory!");
+	TivooUtils.clearDirectory(outputdetails);
+	return new FileWriter(outputsummary);
+    }
+    
+    protected String buildDetailURL(TivooEvent e) {
+        return e.getTitle()
+        	.replaceAll("[^A-z0-9]", "").replaceAll("\\s+", "_").trim().concat(".html");
+    }
+    
+    protected String formatDetailURL(TivooEvent e, String outputdetails) {
+	 String s = outputdetails + buildDetailURL(e);
+	 return s.substring(outputdetails.indexOf("/") + 1);
+	//return outputdetails + buildDetailURL(e);
+    }
     
     protected void doWriteDetailPage(TivooEvent e, String outputsummary, String outputdetails)
 	    throws IOException {
@@ -24,29 +43,76 @@ public abstract class TivooWriter {
 	._head().write("\n");
     }
     
-    protected String buildDetailURL(TivooEvent e) {
-        return e.getTitle()
-        	.replaceAll("[^A-z0-9]", "").replaceAll("\\s+", "_").trim().concat(".html");
+    protected void startHtml(HtmlCanvas target) throws IOException {
+	target.html().write("\n");
     }
     
-    protected void writeTableCell(HtmlCanvas target, String content) 
-	    throws IOException {
-	target.td().write(content)._td();
+    protected void endHtml(HtmlCanvas target) throws IOException {
+	target._html().write("\n");
     }
     
-    protected void writeTableCell(HtmlCanvas target, String content, String cssclass) 
-	    throws IOException {
-	target.td(class_(cssclass)).write(content)._td();
+    protected void startBody(HtmlCanvas target) throws IOException {
+	target.body().write("\n");
     }
     
-    protected void writeTableCell(HtmlCanvas target, String content, String cssclass, String href) 
+    protected void endBody(HtmlCanvas target) throws IOException {
+	target._body().write("\n");
+    }
+    
+    protected void startTable(HtmlCanvas target, String cssclass, 
+	    String width, String align, String border, 
+	    String cellpadding, String cellspacing) throws IOException {
+	target.table(class_(cssclass).width(width).align(align).border(border)
+		.cellpadding(cellpadding).cellspacing(cellspacing)).write("\n");
+    }
+    
+    protected void endTable(HtmlCanvas target) throws IOException {
+	target._table().write("\n");
+    }
+    
+    protected void startRow(HtmlCanvas target) throws IOException {
+	target.tr().write("\n");
+    }
+    
+    protected void endRow(HtmlCanvas target) throws IOException {
+	target._tr().write("\n");
+    }
+    
+    protected void writeTableHead(HtmlCanvas target, String cssclass, String width,
+	    String rowspan, String colspan, String content, String link) 
 	    throws IOException {
 	target
-	.td(class_(cssclass))
-	  .a(href(href))
-	    .write(content)
-	  ._a()
-	._td();
+	.th(class_(cssclass).width(width).rowspan(rowspan).colspan(colspan)).write("\n");
+	  if (!link.equals("")) target.a(href(link));
+	  else target.a();
+	  target.write(content)._a()
+	._th().write("\n");
+    }
+    
+    protected void writeTableCellLink(HtmlCanvas target, String cssclass, String width, String rowspan, String colspan, 
+	    String content, String link) 
+	    throws IOException {
+	target
+	.td(class_(cssclass).width(width).rowspan(rowspan).colspan(colspan)).write("\n")
+	.a(href(link)).write(content)._a()
+	._td().write("\n");
+    }
+    
+    protected void writeTableCellLiteral(HtmlCanvas target, String cssclass, String width, String rowspan, String colspan, 
+	    String content) 
+	    throws IOException {
+	target.td(class_(cssclass).width(width).rowspan(rowspan).colspan(colspan)).write("\n")
+	   .write(content)._td().write("\n");
+    }
+    
+    protected void writeParagraph(HtmlCanvas target, String cssclass, String content, String link) 
+	    throws IOException {
+	target
+	.p(class_(cssclass)).write("\n");
+	  if (!link.equals("")) target.a(href(link));
+	  else target.a();
+	  target.write(content)._a()
+	._p().write("\n");
     }
     
 }

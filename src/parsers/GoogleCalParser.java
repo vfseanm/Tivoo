@@ -1,13 +1,10 @@
 package parsers;
 
 import java.util.*;
-
 import org.dom4j.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
-
 import sharedattributes.*;
-
 import model.*;
 
 public class GoogleCalParser extends TivooParser {
@@ -19,6 +16,10 @@ public class GoogleCalParser extends TivooParser {
 	setEventType(new GoogleCalEventType());
 	updateNoNeedParseMap(new Title(), "./*[name()='title']");
 	updateNoNeedParseMap(new Description(), "./*[name()='content']");
+    }
+    
+    public TivooEventType getEventType() {
+	return new GoogleCalEventType();
     }
     
     protected void topLevelParsing(Document doc) {
@@ -107,6 +108,11 @@ public class GoogleCalParser extends TivooParser {
 	return toreturn;
     }
     
-    private class GoogleCalEventType extends TivooEventType {}
+    private class GoogleCalEventType extends TivooEventType {
 
+	public String toString() {
+	    return "Google Calendar";
+	}
+	
+    }
 }

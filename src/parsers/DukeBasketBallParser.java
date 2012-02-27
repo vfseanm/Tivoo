@@ -1,13 +1,10 @@
 package parsers;
 
 import java.util.*;
-
 import model.*;
 import org.dom4j.*;
 import org.joda.time.*;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
+import org.joda.time.format.*;
 import sharedattributes.*;
 
 public class DukeBasketBallParser extends TivooParser {
@@ -26,6 +23,10 @@ public class DukeBasketBallParser extends TivooParser {
     	return (rootname.contentEquals("dataroot"));
     }
 
+    public TivooEventType getEventType() {
+	return new DukeBasketBallEventType();
+    }
+    
     protected void topLevelParsing(Document doc) {}
 
     protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
@@ -53,6 +54,10 @@ public class DukeBasketBallParser extends TivooParser {
 		    add(new Location());
 	    }};
 	    addSpecialAttributes(toadd);
+	}
+	
+	public String toString() {
+	    return "Duke Basketball";
 	}
 	
     }

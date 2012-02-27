@@ -31,16 +31,15 @@ public class Filter {
 	    Set<String> keywords, boolean retain) {
 	List<TivooEvent> filtered = new ArrayList<TivooEvent>();
 	for (TivooEvent e: eventlist) {
+	    int count = 0;
 	    for (String keyword: keywords) {
 		if ((e.hasKeyWord(keyword, false) && retain) || 
 			(!e.hasKeyWord(keyword, false) && !retain))
-		    filtered.add(e);
+		    count++;
 	    }
+	    if (count == keywords.size()) filtered.add(e);
 	}
 	return filtered;
     }
-    
-    
-    
     
 }

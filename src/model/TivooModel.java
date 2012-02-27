@@ -1,25 +1,42 @@
 package model;
-
+import java.io.*;
 import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
+import parsers.*;
 import filters.*;
 
 public class TivooModel {
 
     private List<TivooEvent> eventlist;
     private List<TivooEvent> filteredlist;
+    private Set<TivooEventType> seentypes;
     
     public TivooModel() {
 	eventlist = new ArrayList<TivooEvent>();
 	filteredlist = new ArrayList<TivooEvent>();
+	seentypes = new HashSet<TivooEventType>();
     }
+
     public List<TivooEvent> getFilteredList() {
 	return new ArrayList<TivooEvent>(filteredlist);
     }
     
     public List<TivooEvent> getOriginalList() {
 	return Collections.unmodifiableList(eventlist);
+    }
+    
+    public Set<TivooEventType> getSeenTypes() {
+	return Collections.unmodifiableSet(seentypes);
+    }
+    
+    public TivooEventType[] getSeenTypesArray() {
+	TivooEventType[] toreturn = new TivooEventType[seentypes.size()];
+	int j = 0;
+	for (Iterator<TivooEventType> i = seentypes.iterator(); i.hasNext(); j++)
+	    toreturn[j] = i.next();
+	Arrays.sort(toreturn);
+	return toreturn;
     }
     
     public void clearFilter() {
@@ -29,10 +46,15 @@ public class TivooModel {
     
     public void reset() {
 	eventlist.clear();
+	filteredlist.clear();
+	seentypes.clear();
     }
     
-    public void read(String input) throws DocumentException {
-    	eventlist.addAll(TivooReader.read(input));
+    public void read(File input) {
+	Document doc = TivooReader.read(input);
+	TivooParser p = TivooReader.findParser(doc);
+	seentypes.add(p.getEventType());
+    	eventlist.addAll(TivooReader.convertToList(doc, p));
     	filteredlist = new ArrayList<TivooEvent>(eventlist);
     }
     

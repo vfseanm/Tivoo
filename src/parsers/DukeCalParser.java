@@ -1,10 +1,8 @@
 package parsers;
 
 import java.util.*;
-
 import org.dom4j.*;
 import org.joda.time.*;
-
 import sharedattributes.*;
 import model.*;
 
@@ -16,6 +14,10 @@ public class DukeCalParser extends TivooParser {
 	updateNoNeedParseMap(new Title(), "./*[name()='summary']");
 	updateNoNeedParseMap(new Description(), "./*[name()='description']");
 	updateNoNeedParseMap(new Location(), "./location/*[name()='address']");
+    }
+    
+    public TivooEventType getEventType() {
+	return new DukeCalEventType();
     }
     
     protected void topLevelParsing(Document doc) {}
@@ -46,6 +48,10 @@ public class DukeCalParser extends TivooParser {
 		add(new Location());
 	    }};
 	    addSpecialAttributes(localSpecialAttributes);
+	}
+	
+	public String toString() {
+	    return "Duke Calendar";
 	}
 	
     }

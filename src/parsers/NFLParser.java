@@ -1,14 +1,10 @@
 package parsers;
 
 import java.util.*;
-
-import model.TivooEventType;
-
 import org.dom4j.*;
 import org.joda.time.*;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
+import org.joda.time.format.*;
+import model.*;
 import sharedattributes.*;
 
 public class NFLParser extends TivooParser {
@@ -24,6 +20,10 @@ public class NFLParser extends TivooParser {
     public boolean wellFormed(Document doc) {
     	String rootname = doc.getRootElement().getName();
     	return (rootname.contentEquals("document"));
+    }
+    
+    public TivooEventType getEventType() {
+	return new NFLEventType();
     }
 
     protected void topLevelParsing(Document doc) {}
@@ -51,6 +51,10 @@ public class NFLParser extends TivooParser {
 		add(new Location());
 	    }};
 	    addSpecialAttributes(localSpecialAttributes);
+	}
+
+	public String toString() {
+	    return "NFL";
 	}
 	
     }

@@ -6,16 +6,16 @@ import org.joda.time.*;
 import org.rendersnake.*;
 import model.*;
 
-public class WeeklyCalendarWriter extends TivooWriter {
+public class MonthlyCalendarWriter extends TivooWriter {
 
     private ArrayList<TivooEvent> event;
     private ArrayList<Integer> date;
-    private ArrayList<Integer> time;
+    private ArrayList<Integer> week;
 
     private void clearList() {
 	event = new ArrayList<TivooEvent>();
 	date = new ArrayList<Integer>();
-	time = new ArrayList<Integer>();
+	week = new ArrayList<Integer>();
     }
 
     public void write(List<TivooEvent> eventlist, String outputsummary,
@@ -24,35 +24,33 @@ public class WeeklyCalendarWriter extends TivooWriter {
 	HtmlCanvas summary = new HtmlCanvas(fw);
 	Collections.sort(eventlist, TivooEvent.EventTimeComparator);
 	startHtml(summary);
-	writeHeadWithCSS(summary, "styles/weekly_calendar.css");
+	writeHeadWithCSS(summary, "styles/monthly_calendar.css");
 	startBody(summary);
 	startTable(summary, "", "90%", "center", "1", "0", "0");
 	DateTime current = TivooTimeHandler.createLocalTime(eventlist.get(0).getStart());
 	clearList();
 	boolean flag = true;
 	int count = 0;
-	for (TivooEvent e : eventlist) {
+	for (TivooEvent e: eventlist) {
 	    count++;
 	    boolean addedThisTime = false;
 	    //if (e.isLongEvent()) continue;
 	    DateTime localstart = TivooTimeHandler.createLocalTime(e.getStart());
 	    // DateTime localend = TivooTimeHandler.createLocalTime(e.getEnd());
-	    if (localstart.getWeekOfWeekyear() != current.getWeekOfWeekyear()) {
+	    if (localstart.getMonthOfYear() != current.getMonthOfYear()) {
 		current = localstart;
 		flag = false;
 	    } 
 	    else {
 		date.add(localstart.getDayOfWeek() - 1);
-		time.add(localstart.getHourOfDay());
+		week.add(localstart.getWeekOfWeekyear());
 		event.add(e);
 		addedThisTime = true;
 	    }
 	    if (!event.isEmpty() && (!flag || count == eventlist.size())) {
-		DateTime currentWeek = TivooTimeHandler.createLocalTime(event.get(0).getStart());
-		DateTime weekStart = currentWeek.minusDays(currentWeek.getDayOfWeek() - 1);
 		startRow(summary);
-		String header = weekStart.toString("MMM dd, YYYY") + " ~ " 
-			+ weekStart.plusDays(6).toString("MMM dd, YYYY");
+		String header = TivooTimeHandler.createLocalTime(event.get(0).getStart())
+			.toString("MMMM YYYY");
 		writeTableHead(summary, "", null, "1", "8", header, "");
 		endRow(summary);
 		startRow(summary);
@@ -61,13 +59,19 @@ public class WeeklyCalendarWriter extends TivooWriter {
 		for (String s: firstrow)
 		    writeTableHead(summary, "", "11.25%", "1", "1", s, "");
 		endRow(summary);
-		for (int i = 0; i < 24; i++) {
+		DateTime currentMonth = TivooTimeHandler.createLocalTime(event.get(0).getStart());
+		DateTime monthStart = currentMonth.minusDays(currentMonth.getDayOfMonth() - 1);
+		int startWeek = monthStart.getWeekOfWeekyear();
+		DateTime weekStart = monthStart.minusDays(monthStart.getDayOfWeek() - 1);
+		for (int i = 0; i < 5; i++) {
 		    startRow(summary);
-		    writeTableCellLiteral(summary, "", null, "1", "1", i + ":00");
+		    String rowhead = weekStart.plusDays(i*7).toString("MM.dd")+ 
+			    "-" + weekStart.plusDays(i*7+6).toString("MM.dd");
+		    writeTableCellLiteral(summary, "", null, "1", "1", rowhead);
 		    for (int j = 0; j < 7; j++) {
 			summary.td();
 			for (int k = 0; k < date.size(); k++) {
-			    if (date.get(k) == j && time.get(k) == i) {
+			    if (date.get(k) == j && week.get(k) == i + startWeek) {
 				writeParagraph(summary, "", event.get(k).getTitle(),
 					formatDetailURL(event.get(k), outputdetails));
 				doWriteDetailPage(event.get(k),	outputsummary, outputdetails);
@@ -82,7 +86,7 @@ public class WeeklyCalendarWriter extends TivooWriter {
 	    }
 	    if (!addedThisTime) {
 		date.add(localstart.getDayOfWeek() - 1);
-		time.add(localstart.getHourOfDay());
+		week.add(localstart.getWeekOfWeekyear());
 		event.add(e);
 	    }
 	}

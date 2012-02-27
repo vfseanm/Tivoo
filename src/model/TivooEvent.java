@@ -2,7 +2,6 @@ package model;
 
 import java.util.*;
 import org.joda.time.*;
-
 import sharedattributes.*;
 
 public class TivooEvent {
@@ -16,6 +15,7 @@ public class TivooEvent {
     private DateTime myEnd;
     
     public TivooEvent(TivooEventType type, Map<TivooAttribute, Object> attributes) {
+	myType = type;
 	myCommonAttributes = new HashMap<TivooAttribute, Object>();
 	mySpecialAttributes = new HashMap<TivooAttribute, Object>();
 	Set<TivooAttribute> specialattributes = type.getSpecialAttributes();
@@ -60,6 +60,7 @@ public class TivooEvent {
     }
     
     public boolean hasConflict(TivooEvent other) {
+	if (this.equals(other)) return false;
 	return getInterval().overlaps(other.getInterval());
 	/*return ((other.getStart().compareTo(getEnd()) < 0 && getEnd().compareTo(other.getEnd()) <= 0) ||
 		(getStart().compareTo(other.getEnd()) < 0 && other.getEnd().compareTo(getEnd()) <= 0));*/
@@ -118,5 +119,9 @@ public class TivooEvent {
 	    return e1.getTitle().compareTo(e2.getTitle());
 	}
     };
+    
+    public String toString() {
+	return myTitle;
+    }
     
 }
