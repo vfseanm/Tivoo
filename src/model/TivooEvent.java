@@ -86,8 +86,7 @@ public class TivooEvent {
 	return (myType.equals(other.getType()) &&
 		myTitle.equals(other.getTitle()) &&
 		myStart.equals(other.getStart()) &&
-		myEnd.equals(other.getEnd()) &&
-		myDescription.equals(other.getDescription()));
+		myEnd.equals(other.getEnd()));
     }
     
     public static final Comparator<TivooEvent> EventTimeComparator = new Comparator<TivooEvent>() {

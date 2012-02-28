@@ -50,11 +50,10 @@ public class TivooModel {
 	seentypes.clear();
     }
     
-    public void read(File input) {
-	Document doc = TivooReader.read(input);
-	TivooParser p = TivooReader.findParser(doc);
+    public void read(File input) throws DocumentException {
+	TivooParser p = new TivooReader().read(input);
 	seentypes.add(p.getEventType());
-    	eventlist.addAll(TivooReader.convertToList(doc, p));
+    	eventlist.addAll(p.convertToList(input));
     	filteredlist = new ArrayList<TivooEvent>(eventlist);
     }
     

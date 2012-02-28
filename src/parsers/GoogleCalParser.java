@@ -1,7 +1,9 @@
 package parsers;
 
 import java.util.*;
+
 import org.dom4j.*;
+import org.dom4j.io.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
 import sharedattributes.*;
@@ -10,53 +12,34 @@ import model.*;
 public class GoogleCalParser extends TivooParser {
 
     private DateTimeZone timezone;
-    
+    private List<List<DateTime>> recurringstartend;
+
     public GoogleCalParser() {
-	setEventNodePath("//*[name()='entry']");
+	recurringstartend = new ArrayList<List<DateTime>>();
 	setEventType(new GoogleCalEventType());
-	updateNoNeedParseMap(new Title(), "./*[name()='title']");
-	updateNoNeedParseMap(new Description(), "./*[name()='content']");
+	updateNoNeedParseMap("*[name()='title']", new Title());
+	updateNoNeedParseMap("*[name()='content']", new Description());
+    }
+    
+    protected void setUpHandlers(SAXReader reader) {
+	reader.addHandler("/feed/entry/title", new NoNeedParseHandler());
+	reader.addHandler("/feed/entry/content", new NoNeedParseHandler());
+	reader.addHandler("/feed/gCal:timezone", new TopLevelHandler());
+	reader.addHandler("/feed/entry", new EventLevelHandler());
     }
     
     public TivooEventType getEventType() {
 	return new GoogleCalEventType();
     }
     
-    protected void topLevelParsing(Document doc) {
-	 timezone = DateTimeZone.forID(((Element) doc.selectSingleNode("//*[name()='gCal:timezone']"))
-		.attributeValue("value"));
-    }
-    
-    protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
-	    List<List<DateTime>> recurringstartend) {
-	String timestring = sanitizeString(getNodeStringValue(n, "./*[name()='summary']"));
-	if (timestring.startsWith("Recurring")) {
-	    recurringstartend.addAll(parseRecurringEvent(timestring));
-	    return;
-	}
-	List<DateTime> startend = parseOneTimeEvent(timestring);
-	grabdatamap.put(new StartTime(), startend.get(0));
-	grabdatamap.put(new EndTime(), startend.get(1));
-    }
-    
-    public boolean wellFormed(Document doc) {
-    	String rootname = doc.getRootElement().getName();
-    	return (rootname.contentEquals("feed"));
-    }
-    
-    private String[] fixTime(String[] splitted) {
-	//When: Wed Sep 21, 2011 EDT Event Status: confirmed
-	String[] fixed = new String[8];
-	for (int i = 0; i < splitted.length; i++) fixed[i] = splitted[i];
-	fixed[5] =  "12:01am"; fixed[7] = "11:59pm";
-	return fixed;
+    public String getRootName() {
+	return "feed";
     }
     
     private List<DateTime> parseOneTimeEvent(String timestring) {
 	String[] splitted = timestring.split("\\s+");
 	if (splitted.length < 12)
 	    splitted = Arrays.copyOf(fixTime(splitted), 8);
-	//When: Wed Sep 21, 2011 5:30pm to 6pm EDT Event Status: confirmed
 	String month = splitted[2], 
 		date = splitted[3].replaceAll(",", ""), 
 		year = splitted[4], 
@@ -84,10 +67,9 @@ public class GoogleCalParser extends TivooParser {
 	return toreturn;
     }
     
-    private List<List<DateTime>> parseRecurringEvent (String timestring) {
+    private void parseRecurringEvent (String timestring) {
 	List<DateTime> recurringstart = new ArrayList<DateTime>();
 	List<DateTime> recurringend = new ArrayList<DateTime>();
-	//Recurring Event First start: 2011-08-30 15:00:00 EDT Duration: 3600 Event Status: confirmed
 	String[] splitted = timestring.split("\\s+");
 	String starttime = splitted[4].concat(splitted[5]);
 	DateTimeFormatter formatter = DateTimeFormat.forPattern("YYYY-MM-ddHH:mm:ss")
@@ -103,9 +85,23 @@ public class GoogleCalParser extends TivooParser {
 	    firststart = firststart.plusWeeks(1);
 	    firstend = firstend.plusWeeks(1);
 	}
-	List<List<DateTime>> toreturn = new ArrayList<List<DateTime>>();
-	toreturn.add(recurringstart); toreturn.add(recurringend);
-	return toreturn;
+	recurringstartend.add(recurringstart); recurringstartend.add(recurringend);
+    }
+    
+    private void buildRecurringEvents() {
+	for (int i = 0; i < recurringstartend.get(0).size(); i++) {
+	    Map<TivooAttribute, Object> toadd = new HashMap<TivooAttribute, Object>(grabdatamap);
+	    toadd.put(new StartTime(), recurringstartend.get(0).get(i));
+	    toadd.put(new EndTime(), recurringstartend.get(1).get(i));
+	    eventlist.add(new TivooEvent(eventtype, toadd));
+	}
+    }
+    
+    private String[] fixTime(String[] splitted) {
+	String[] fixed = new String[8];
+	for (int i = 0; i < splitted.length; i++) fixed[i] = splitted[i];
+	fixed[5] =  "12:01am"; fixed[7] = "11:59pm";
+	return fixed;
     }
     
     private class GoogleCalEventType extends TivooEventType {
@@ -115,4 +111,55 @@ public class GoogleCalParser extends TivooParser {
 	}
 	
     }
+    
+    private class TopLevelHandler implements ElementHandler {
+
+	public void onStart(ElementPath elementPath) {}
+
+	public void onEnd(ElementPath elementPath) {
+	    timezone = DateTimeZone.forID(elementPath.getCurrent().attributeValue("value"));
+	}
+	
+    }
+
+    private class EventLevelHandler implements ElementHandler {
+
+	public void onStart(ElementPath elementPath) {
+	    elementPath.addHandler("/feed/entry/summary", new TimeHandler());
+	}
+
+	public void onEnd(ElementPath elementPath) {
+	    if (recurringstartend.isEmpty()) {
+		eventlist.add(new TivooEvent(eventtype,
+			new HashMap<TivooAttribute, Object>(grabdatamap)));
+	    }
+	    else 
+		buildRecurringEvents();
+	    recurringstartend.clear();
+	    grabdatamap.clear();
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+
+    private class TimeHandler implements ElementHandler {
+	
+	public void onStart(ElementPath elementPath) {}
+
+	public void onEnd(ElementPath elementPath) {
+	    Element e = elementPath.getCurrent();
+	    String timestring = sanitizeString(e.getStringValue());
+	    if (timestring.startsWith("Recurring")) {
+		parseRecurringEvent(timestring);
+	    }
+	    else {
+		List<DateTime> startend = parseOneTimeEvent(timestring);
+		grabdatamap.put(new StartTime(), startend.get(0));
+		grabdatamap.put(new EndTime(), startend.get(1));
+	    }
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+
 }

@@ -14,7 +14,7 @@ public class DetailPageWriter extends TivooWriter {
 	    throws IOException {
 	if (new File(outputdetails).isDirectory()) {
 	    for (TivooEvent e: eventlist) {
-		writeOneDetailPage(e, outputsummary, buildDetailURL(e));
+		writeOneDetailPage(e, outputsummary, buildDetailURL(eventlist, e));
 	    }
 	}
 	else writeOneDetailPage(eventlist.get(0), outputsummary, outputdetails);
@@ -40,7 +40,9 @@ public class DetailPageWriter extends TivooWriter {
 	Map<TivooAttribute, Object> specialAttributes = e.getSpecialAttributes();
 	for (TivooAttribute attr: specialAttributes.keySet()) {
 	    startRow(detail);
-	    String towrite = attr.toString() + ": " + specialAttributes.get(attr).toString();
+	    String towrite = attr.toString() + ": " +
+		    specialAttributes.get(attr).toString().replaceAll("\\]", "")
+	    		.replaceAll("\\[", "");
 	    writeTableCellLiteral(detail, "", null, "1", "1", towrite);
 	    endRow(detail);
 	}

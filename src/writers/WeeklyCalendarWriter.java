@@ -69,8 +69,8 @@ public class WeeklyCalendarWriter extends TivooWriter {
 			for (int k = 0; k < date.size(); k++) {
 			    if (date.get(k) == j && time.get(k) == i) {
 				writeParagraph(summary, "", event.get(k).getTitle(),
-					formatDetailURL(event.get(k), outputdetails));
-				doWriteDetailPage(event.get(k),	outputsummary, outputdetails);
+					formatDetailURL(eventlist, event.get(k), outputdetails));
+				doWriteDetailPage(eventlist, event.get(k), outputsummary, outputdetails);
 			    }
 			}
 			summary._td();

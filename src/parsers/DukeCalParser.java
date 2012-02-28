@@ -2,6 +2,7 @@ package parsers;
 
 import java.util.*;
 import org.dom4j.*;
+import org.dom4j.io.*;
 import org.joda.time.*;
 import sharedattributes.*;
 import model.*;
@@ -9,34 +10,29 @@ import model.*;
 public class DukeCalParser extends TivooParser {
     
     public DukeCalParser() {
-	setEventNodePath("//*[name()='event']");
 	setEventType(new DukeCalEventType());
-	updateNoNeedParseMap(new Title(), "./*[name()='summary']");
-	updateNoNeedParseMap(new Description(), "./*[name()='description']");
-	updateNoNeedParseMap(new Location(), "./location/*[name()='address']");
+	updateNoNeedParseMap("summary", new Title());
+	updateNoNeedParseMap("description", new Description());
+	updateNoNeedParseMap("address", new Location());
+    }
+    
+    protected void setUpHandlers(SAXReader reader) {
+	reader.addHandler("/events/event/summary", new NoNeedParseHandler());
+	reader.addHandler("/events/event/description", new NoNeedParseHandler());
+	reader.addHandler("/events/event/location/address", new NoNeedParseHandler());
+	reader.addHandler("/events/event", new EventLevelHandler());
     }
     
     public TivooEventType getEventType() {
 	return new DukeCalEventType();
     }
     
-    protected void topLevelParsing(Document doc) {}
-    
-    protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
-	    List<List<DateTime>> recurringstartend) {
-	DateTime starttime = parseTime(n, "./start/*[name()='utcdate']");
-	DateTime endtime = parseTime(n, "./end/*[name()='utcdate']");
-	grabdatamap.put(new StartTime(), starttime);
-	grabdatamap.put(new EndTime(), endtime);
+    public String getRootName() {
+    	return "events";
     }
     
-    public boolean wellFormed(Document doc) {
-    	String rootname = doc.getRootElement().getName();
-    	return (rootname.contentEquals("events"));
-    }
-    
-    private DateTime parseTime(Node n, String xpath) {
-	String timestring = getNodeStringValue(n, xpath);
+    private DateTime parseTime(Element e) {
+	String timestring = e.getStringValue();
 	return TivooTimeHandler.createTimeUTC(timestring);
     }
 
@@ -52,6 +48,41 @@ public class DukeCalParser extends TivooParser {
 	
 	public String toString() {
 	    return "Duke Calendar";
+	}
+	
+    }
+    
+    private class EventLevelHandler implements ElementHandler {
+
+	public void onStart(ElementPath elementPath) {
+	    elementPath.addHandler("start/utcdate", new TimeHandler());
+	    elementPath.addHandler("end/utcdate", new TimeHandler());
+	}
+
+	public void onEnd(ElementPath elementPath) {
+            eventlist.add(new TivooEvent(eventtype, 
+        	    new HashMap<TivooAttribute, Object>(grabdatamap)));
+	    grabdatamap.clear();
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+
+    private class TimeHandler implements ElementHandler {
+	
+	public void onStart(ElementPath elementPath) {}
+
+	public void onEnd(ElementPath elementPath) {
+	    Element e = elementPath.getCurrent();
+	    if (e.getPath().contains("start")) {
+		DateTime starttime = parseTime(e);
+		grabdatamap.put(new StartTime(), starttime);
+	    }
+	    else {
+		DateTime endtime = parseTime(e);
+		grabdatamap.put(new EndTime(), endtime);
+	    }
+	    elementPath.getCurrent().detach();
 	}
 	
     }

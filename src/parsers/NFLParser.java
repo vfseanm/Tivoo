@@ -1,7 +1,9 @@
 package parsers;
 
 import java.util.*;
+
 import org.dom4j.*;
+import org.dom4j.io.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
 import model.*;
@@ -10,35 +12,29 @@ import sharedattributes.*;
 public class NFLParser extends TivooParser {
 
     public NFLParser() {
-	setEventNodePath("//*[name()='row']");
 	setEventType(new NFLEventType());
-	updateNoNeedParseMap(new Title(), "./*[name()='Col1']");
-	updateNoNeedParseMap(new Description(), "./*[name()='Col2']");
-	updateNoNeedParseMap(new Location(), "./*[name()='Col15']");
+	updateNoNeedParseMap("Col1", new Title());
+	updateNoNeedParseMap("Col2", new Description());
+	updateNoNeedParseMap("Col15", new Location());
     }
     
-    public boolean wellFormed(Document doc) {
-    	String rootname = doc.getRootElement().getName();
-    	return (rootname.contentEquals("document"));
+    protected void setUpHandlers(SAXReader reader) {
+	reader.addHandler("/document/row/Col1", new NoNeedParseHandler());
+	reader.addHandler("/document/row/Col2", new NoNeedParseHandler());
+	reader.addHandler("/document/row/Col15", new NoNeedParseHandler());
+	reader.addHandler("/document/row", new EventLevelHandler());
+    }
+    
+    public String getRootName() {
+    	return "document";
     }
     
     public TivooEventType getEventType() {
 	return new NFLEventType();
     }
 
-    protected void topLevelParsing(Document doc) {}
-
-    protected void eventLevelParsing(Node n,
-	    Map<TivooAttribute, Object> grabdatamap,
-	    List<List<DateTime>> recurringstartend) {
-	DateTime starttime = parseTime(n, "./*[name()='Col8']");
-	DateTime endtime = parseTime(n, "./*[name()='Col9']");
-	grabdatamap.put(new StartTime(), starttime);
-	grabdatamap.put(new EndTime(), endtime);
-    }
-    
-    private DateTime parseTime(Node n, String xpath) {
-	String timestring = getNodeStringValue(n, xpath);
+    private DateTime parseTime(Element e) {
+	String timestring = e.getStringValue();
 	DateTimeFormatter formatter = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss");
 	return formatter.parseDateTime(timestring).plusHours(12);
     }
@@ -55,6 +51,41 @@ public class NFLParser extends TivooParser {
 
 	public String toString() {
 	    return "NFL";
+	}
+	
+    }
+    
+    private class EventLevelHandler implements ElementHandler {
+
+	public void onStart(ElementPath elementPath) {
+	    elementPath.addHandler("Col8", new TimeHandler());
+	    elementPath.addHandler("Col9", new TimeHandler());
+	}
+
+	public void onEnd(ElementPath elementPath) {
+            eventlist.add(new TivooEvent(eventtype, 
+        	    new HashMap<TivooAttribute, Object>(grabdatamap)));
+	    grabdatamap.clear();
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+
+    private class TimeHandler implements ElementHandler {
+	
+	public void onStart(ElementPath elementPath) {}
+
+	public void onEnd(ElementPath elementPath) {
+	    Element e = elementPath.getCurrent();
+	    if (e.getName().equals("Col8")) {
+		DateTime starttime = parseTime(e);
+		grabdatamap.put(new StartTime(), starttime);
+	    }
+	    else {
+		DateTime endtime = parseTime(e);
+		grabdatamap.put(new EndTime(), endtime);
+	    }
+	    elementPath.getCurrent().detach();
 	}
 	
     }

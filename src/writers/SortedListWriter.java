@@ -19,9 +19,9 @@ public class SortedListWriter extends TivooWriter {
 	for (TivooEvent e : eventlist) {
 	    startRow(summary);
 	    writeTableCellLink(summary, "", null, "1", "1", e.getTitle(), 
-		    formatDetailURL(e, outputdetails));
+		    formatDetailURL(eventlist, e, outputdetails));
 	    endRow(summary);
-	    doWriteDetailPage(e, outputsummary, outputdetails);
+	    doWriteDetailPage(eventlist, e, outputsummary, outputdetails);
 	}
 	endTable(summary);
 	endBody(summary);

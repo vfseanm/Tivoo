@@ -19,22 +19,24 @@ public abstract class TivooWriter {
 	return new FileWriter(outputsummary);
     }
     
-    protected String buildDetailURL(TivooEvent e) {
+    protected String buildDetailURL(List<TivooEvent> eventlist, TivooEvent e) {
         return e.getTitle()
-        	.replaceAll("[^A-z0-9]", "").replaceAll("\\s+", "_").trim().concat(".html");
+        	.replaceAll("[^A-z0-9]", "").replaceAll("\\s+", "_").trim()
+        	.concat(Integer.toString(eventlist.indexOf(e))).concat(".html");
     }
     
-    protected String formatDetailURL(TivooEvent e, String outputdetails) {
-	 String s = outputdetails + buildDetailURL(e);
+    protected String formatDetailURL(List<TivooEvent> eventlist, TivooEvent e, String outputdetails) {
+	 String s = outputdetails + buildDetailURL(eventlist, e);
 	 return s.substring(outputdetails.indexOf("/") + 1);
 	//return outputdetails + buildDetailURL(e);
     }
     
-    protected void doWriteDetailPage(TivooEvent e, String outputsummary, String outputdetails)
+    protected void doWriteDetailPage(List<TivooEvent> eventlist,
+	    TivooEvent e, String outputsummary, String outputdetails)
 	    throws IOException {
 	List<TivooEvent> oneevent = new ArrayList<TivooEvent>();
 	oneevent.add(e);
-	new DetailPageWriter().write(oneevent, outputsummary, outputdetails + buildDetailURL(e));
+	new DetailPageWriter().write(oneevent, outputsummary, outputdetails + buildDetailURL(eventlist, e));
     }
     
     protected void writeHeadWithCSS(HtmlCanvas target, String stylefile) throws IOException {

@@ -9,45 +9,53 @@ import parsers.*;
 
 public class TivooReader {
 
-    private static List<TivooParser> parsers = new ArrayList<TivooParser>();
+    private TivooParser pickedparser;
+    private static Map<String, TivooParser> parsermap;
+    
+    private static Set<TivooParser> parserset = new HashSet<TivooParser>();
     static {
-	parsers.add(new DukeCalParser());
-	parsers.add(new GoogleCalParser());
-	parsers.add(new DukeBasketBallParser());
-	parsers.add(new TVParser());
-	parsers.add(new NFLParser());
+	parserset.add(new DukeCalParser());
+	parserset.add(new GoogleCalParser());
+	parserset.add(new DukeBasketBallParser());
+	parserset.add(new NFLParser());
+	parserset.add(new TVParser());
+	parsermap = new HashMap<String, TivooParser>();
+	for (TivooParser p: parserset)
+	    parsermap.put(p.getRootName(), p);
     }
     
-    public static Document read(File input) {
-	SAXReader reader = new SAXReader();
+    public static SAXReader getReader() {
+        SAXReader reader = new SAXReader();
 	reader.setEntityResolver(new EntityResolver() {
 	    public InputSource resolveEntity(String publicID, String systemID) {
 		return new InputSource(new ByteArrayInputStream
 			("<?xml version='1.0' encoding='GBK'?>".getBytes()));  
 	    }
 	});
-	Document doc = null;
-	try {
-	    doc = reader.read(input);
-	} catch (DocumentException e) {
-	    e.printStackTrace();
+	return reader;
+    }
+    
+    public TivooParser read(File input) throws DocumentException {
+	SAXReader reader = getReader();
+	for (String rootname: parsermap.keySet()) {
+	    reader.addHandler("/" + rootname, new TypeCheckHandler());
 	}
-	return doc;
+	reader.read(input);
+	return pickedparser;
     }
     
-    public static List<TivooEvent> convertToList(Document doc, TivooParser p) {
-	return p.convertToList(doc);
-    }
-    
-    public static TivooParser findParser(Document doc) {
-	TivooParser theparser = null;
-    	for(TivooParser p: parsers) {
-    	    if (p.wellFormed(doc))
-    		theparser = p;
-    	}
-    	if (theparser == null)
-	    throw new TivooException("Malformed XML file!");
-    	return theparser;
-    }
+    private class TypeCheckHandler implements ElementHandler {
 
+	public void onStart(ElementPath elementPath) {
+	    String rootstring = elementPath.getCurrent().getName();
+	    pickedparser = parsermap.get(rootstring);
+	    elementPath.getCurrent().detach();
+	}
+
+	public void onEnd(ElementPath elementPath) {
+	    elementPath.getCurrent().detach();
+	}
+	
+    }   
+    
 }

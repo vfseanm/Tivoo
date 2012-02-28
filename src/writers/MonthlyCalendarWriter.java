@@ -73,8 +73,8 @@ public class MonthlyCalendarWriter extends TivooWriter {
 			for (int k = 0; k < date.size(); k++) {
 			    if (date.get(k) == j && week.get(k) == i + startWeek) {
 				writeParagraph(summary, "", event.get(k).getTitle(),
-					formatDetailURL(event.get(k), outputdetails));
-				doWriteDetailPage(event.get(k),	outputsummary, outputdetails);
+					formatDetailURL(eventlist, event.get(k), outputdetails));
+				doWriteDetailPage(eventlist, event.get(k),	outputsummary, outputdetails);
 			    }
 			}
 			summary._td();

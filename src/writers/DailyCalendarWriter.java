@@ -26,9 +26,9 @@ public class DailyCalendarWriter extends TivooWriter {
 	    startRow(summary);
 	    writeTableHead(summary, "time", null, "1", "1", formatStartEnd(localstart, localend), "");
 	    writeTableCellLink(summary, "", null, "1", "1", e.getTitle(), 
-		    formatDetailURL(e, outputdetails));
+		    formatDetailURL(eventlist, e, outputdetails));
 	    endRow(summary);
-	    doWriteDetailPage(e, outputsummary, outputdetails);
+	    doWriteDetailPage(eventlist, e, outputsummary, outputdetails);
 	}
 	endTable(summary);
 	endBody(summary);

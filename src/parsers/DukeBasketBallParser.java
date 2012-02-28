@@ -3,42 +3,35 @@ package parsers;
 import java.util.*;
 import model.*;
 import org.dom4j.*;
+import org.dom4j.io.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
 import sharedattributes.*;
 
 public class DukeBasketBallParser extends TivooParser {
 
+    private String cachedstartdate, cachedenddate;
+    
     public DukeBasketBallParser() {
-	setEventNodePath("//*[name()='Calendar']");
 	setEventType(new DukeBasketBallEventType());
-	updateNoNeedParseMap(new Title(), "./*[name()='Subject']");
-	updateNoNeedParseMap(new Description(), "./*[name()='Description']");
-	updateNoNeedParseMap(new Location(), "./*[name()='Location']");
+	updateNoNeedParseMap("Subject", new Title());
+	updateNoNeedParseMap("Description", new Description());
+	updateNoNeedParseMap("Location", new Location());
+    }
 
+    protected void setUpHandlers(SAXReader reader) {
+	reader.addHandler("/dataroot/Calendar/Subject", new NoNeedParseHandler());
+	reader.addHandler("/dataroot/Calendar/Description", new NoNeedParseHandler());
+	reader.addHandler("/dataroot/Calendar/Location", new NoNeedParseHandler());
+	reader.addHandler("/dataroot/Calendar", new EventLevelHandler());
     }
     
-    public boolean wellFormed(Document doc) {
-    	String rootname = doc.getRootElement().getName();
-    	return (rootname.contentEquals("dataroot"));
-    }
-
     public TivooEventType getEventType() {
 	return new DukeBasketBallEventType();
     }
-    
-    protected void topLevelParsing(Document doc) {}
-
-    protected void eventLevelParsing(Node n, Map<TivooAttribute, Object> grabdatamap,
-	    List<List<DateTime>> recurringstartend) {
-	String startdatestring = getNodeStringValue(n, "./*[name()='StartDate']");
-	String starttimestring = getNodeStringValue(n, "./*[name()='StartTime']");
-	String enddatestring = getNodeStringValue(n, "./*[name()='EndDate']");
-	String endtimestring = getNodeStringValue(n, "./*[name()='EndTime']");
-	DateTime starttime = parseTime(startdatestring.concat(" " + starttimestring));
-	DateTime endtime = parseTime(enddatestring.concat(" " + endtimestring));
-	grabdatamap.put(new StartTime(), starttime);
-	grabdatamap.put(new EndTime(), endtime);
+	
+    public String getRootName() {
+    	return "dataroot";
     }
     
     private DateTime parseTime(String timestring) {
@@ -46,6 +39,49 @@ public class DukeBasketBallParser extends TivooParser {
 	return formatter.parseDateTime(timestring);
     }
 
+    private class EventLevelHandler implements ElementHandler {
+
+	public void onStart(ElementPath elementPath) {
+	    elementPath.addHandler("StartDate", new TimeHandler());
+	    elementPath.addHandler("StartTime", new TimeHandler());
+	    elementPath.addHandler("EndDate", new TimeHandler());
+	    elementPath.addHandler("EndTime", new TimeHandler());
+	}
+
+	public void onEnd(ElementPath elementPath) {
+            eventlist.add(new TivooEvent(eventtype, 
+        	    new HashMap<TivooAttribute, Object>(grabdatamap)));
+	    grabdatamap.clear();
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+    
+    private class TimeHandler implements ElementHandler {
+	
+	public void onStart(ElementPath elementPath) {}
+
+	public void onEnd(ElementPath elementPath) {
+	    Element e = elementPath.getCurrent();
+	    if (e.getName().equals("StartDate"))
+		cachedstartdate = e.getStringValue();
+	    if (e.getName().equals("StartTime")) {
+		DateTime starttime = parseTime(cachedstartdate.concat(" " + 
+			e.getStringValue()));
+		grabdatamap.put(new StartTime(), starttime);
+	    }
+	    if (e.getName().equals("EndDate"))
+		cachedenddate = e.getStringValue();
+	    if (e.getName().equals("EndTime")) {
+		DateTime endtime = parseTime(cachedenddate.concat(" " + 
+			e.getStringValue()));
+		grabdatamap.put(new EndTime(), endtime);
+	    }
+	    elementPath.getCurrent().detach();
+	}
+	
+    }
+    
     private class DukeBasketBallEventType extends TivooEventType {
 
 	private DukeBasketBallEventType() {
@@ -61,5 +97,5 @@ public class DukeBasketBallParser extends TivooParser {
 	}
 	
     }
-    
+
 }

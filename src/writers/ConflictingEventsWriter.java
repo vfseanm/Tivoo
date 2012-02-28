@@ -25,7 +25,7 @@ public class ConflictingEventsWriter extends TivooWriter {
 	    if (!conflicts.isEmpty()) {
 		startRow(summary);
 		writeTableCellLink(summary, "conflict", null, "1", "1", e.getTitle(), 
-			formatDetailURL(e, outputdetails));
+			formatDetailURL(eventlist, e, outputdetails));
 		endRow(summary);
 		for (TivooEvent o: conflicts) {
 		    startRow(summary);
@@ -33,7 +33,7 @@ public class ConflictingEventsWriter extends TivooWriter {
 		    endRow(summary);
 		}
 	    }
-	    doWriteDetailPage(e, outputsummary, outputdetails);
+	    doWriteDetailPage(eventlist, e, outputsummary, outputdetails);
 	}
 	endTable(summary);
 	endBody(summary);
